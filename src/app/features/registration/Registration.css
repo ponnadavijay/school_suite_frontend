@@ -1,0 +1,231 @@
+.registration-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background-color: #f9f9f9;
+  min-height: 100vh;
+  gap: 1rem;
+}
+
+.company-logo {
+  display: flex;
+  align-items: center;
+  height: clamp(30px, 3vw, 50px);
+}
+.registration-container .company-logo-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  cursor: pointer;
+}
+.company-icon {
+  width: 30px;
+  height: 30px;
+  background-color: #ccc;
+  margin-right: 8px;
+  border-radius: 4px;
+}
+.header-title {
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 16px;
+  text-align: left;
+  color: #333;
+}
+.registration-container .registration-form {
+  background-color: var(--main-background-color);
+  padding: 20px;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 450px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  height: 100%;
+}
+
+.registration-container .registration-form-title {
+  font-family: var(--font-family);
+  font-size: 1.4rem;
+  /* font-weight: var(--bold-font-weight); */
+  font-weight: 500;
+  color: #000000;
+}
+
+.registration-container .registration-form-label {
+  display: block;
+  text-align: left;
+  margin: 2px 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: #000000;
+}
+
+.registration-container .registration-form-input {
+  width: 100%;
+  padding: 12px;
+  margin-top: 4px;
+  font-size: 1rem;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #ffffff;
+  color: #000000;
+}
+
+.registration-container .password-field {
+  position: relative;
+}
+
+.registration-container .eye-icon {
+  position: absolute;
+  right: 8px;
+  top: 40%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  font-size: 18px;
+  color: #666;
+}
+.registration-container .signup-btn {
+  width: 100%;
+  padding: 10px;
+  background-color: var(--primary-color);
+  color: var(--main-background-color);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.registration-container .registration-footer-container {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 12px;
+}
+
+.registration-footer-container .registration-footer-content {
+  color: var(--primary-color);
+  margin: 0 4px;
+}
+.error-message {
+  color: var(--accent-color);
+  font-size: 12px;
+}
+.registration-lawfirm-container {
+  padding-bottom: 1rem;
+}
+.registration-checkbox-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  font-size: 14px;
+  color: #333;
+}
+
+.registration-checkbox-container input[type="checkbox"] {
+  margin: 0;
+  width: 16px;
+  height: 16px;
+}
+.registration-login--content {
+  padding-top: 0.5rem;
+}
+.registration-login-text {
+  text-align: center;
+  font-size: 1rem;
+  color: var(--secondary-sub-text-color);
+}
+
+.terms-and-cond-login-link-text {
+  color: var(--primary-color);
+  padding-top: 0rem;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.terms-and-cond-link-text:hover {
+  text-decoration: none;
+}
+
+.terms-and-cond-checkbox-container {
+  display: flex;
+  align-items: center;
+  padding: 0;
+  margin: 0;
+  gap: 0.5rem;
+  font-size: 14px;
+  color: #333;
+}
+
+.terms-and-cond-checkbox-container input[type="checkbox"] {
+  margin: 0;
+  width: 16px;
+  height: 16px;
+  background-color: #ffffff;
+}
+
+.terms-and-cond-checkbox-label {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.terms-and-cond-terms-text {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: #000000;
+}
+.registration-login-link-text {
+  color: var(--primary-color);
+  cursor: pointer;
+  font-weight: 400;
+}
+
+.registration-dialog-box-close-button {
+  display: flex;
+  justify-content: flex-end;
+}
+
+
+@media (max-width: 768px) {
+  .terms-and-cond-checkbox-container {
+    display: flex;
+    align-items: center;
+    padding: 0;
+    margin: 0;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    font-size: 14px;
+    color: #333;
+  }
+  
+  .terms-and-cond-checkbox-container input[type="checkbox"] {
+    margin: 0;
+    width: 22px;
+    height: 20px;
+  }
+  .terms-and-cond-checkbox-label {
+    display: flex;
+    align-items: flex-start;
+    height: 1.8rem;
+    margin-bottom: 1rem;
+  }
+  .terms-and-cond-terms-text {
+    justify-content: flex-start;
+    padding-left: 0;
+    margin-left: 0;
+    font-size: 1rem;
+    align-items: center;
+    gap: 0;
+    word-spacing: normal;
+  }
+  .terms-and-cond-login-link-text {
+    font-size: 1rem;
+  }
+}

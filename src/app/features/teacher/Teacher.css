@@ -1,0 +1,13 @@
+.teacher-page {
+  padding: 16px;
+}
+
+.teacher-header {
+  background-color: #f5f5f5;
+  padding: 8px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}

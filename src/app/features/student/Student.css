@@ -1,0 +1,12 @@
+.student-page {
+  padding: 20px;
+}
+
+.student-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+/* Reuse the same table styles from Teacher.css */

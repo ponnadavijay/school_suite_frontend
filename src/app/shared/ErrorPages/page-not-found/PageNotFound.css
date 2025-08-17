@@ -1,0 +1,32 @@
+.notfound-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    text-align: center;
+  }
+
+  .notfound-image {
+    max-width: 300px;
+    margin-bottom: 20px;
+  }
+
+  .notfound-title {
+    margin-top: 20px;
+  }
+
+  .notfound-subtitle {
+    margin-bottom: 10px;
+    color: #5960eb;
+  }
+
+  .notfound-description {
+    margin-bottom: 20px;
+    color: #5960eb;
+  }
+
+  .notfound-button {
+    margin-top: 20px;
+    color: #5f68ff;
+  }

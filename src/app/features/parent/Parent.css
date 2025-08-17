@@ -1,0 +1,37 @@
+.parent-page {
+  padding: 20px;
+}
+
+.parent-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+/* Table styles to match your existing design */
+.parent-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.parent-table th,
+.parent-table td {
+  border: 1px solid rgba(224, 224, 224, 1);
+  padding: 12px;
+  text-align: left;
+}
+
+.parent-table th {
+  background-color: #f5f5f5;
+  font-weight: 600;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .parent-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+}

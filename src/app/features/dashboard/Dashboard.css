@@ -1,0 +1,61 @@
+.dashboard-container {
+    display: flex;
+    height: 100vh;
+    font-family: sans-serif;
+}
+
+
+.sidebar.collapsed {
+    width: 80px;
+}
+
+.sidebar-header {
+    font-size: 18px;
+    padding: 1rem;
+}
+
+.sidebar-menu {
+    list-style-type: none;
+    padding: 0 1rem;
+}
+
+.sidebar-menu li {
+    padding: 10px 0;
+    cursor: pointer;
+}
+
+/* Main Content */
+.main-content {
+    flex-grow: 1;
+    background-color: white;
+    display: flex;
+    flex-direction: column;
+}
+
+.menu-toggle {
+    font-size: 20px;
+    background: none;
+    border: none;
+    color: #000000;
+    cursor: pointer;
+}
+
+.toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.logout-btn {
+    background-color: #e74c3c;
+    border: none;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+/* Dashboard Content */
+.dashboard-content {
+    padding: 20px;
+}

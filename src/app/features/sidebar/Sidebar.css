@@ -1,0 +1,86 @@
+.sidebar {
+  flex-shrink: 0;
+  white-space: nowrap;
+  overflow-x: hidden;
+  border-right: 1px solid lightgray;
+  transition: width 0.3s ease;
+  background-color: #ffffff;
+  color: #000000;
+}
+
+.sidebar.open {
+  width: 240px;
+}
+
+.sidebar.closed {
+  width: 80px;
+}
+
+.sidebar-list {
+  padding: 8px !important;
+  max-width: 240px;
+  margin: 8px;
+}
+
+.sidebar-item {
+  min-height: 48px;
+  padding: 10px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  width: 100%;
+  overflow: hidden;
+}
+
+.sidebar-item:hover {
+  background-color: #f5f5f5;
+  cursor: pointer;
+}
+
+/* SVG image styling */
+.sidebar-icon img {
+  width: 24px;
+  height: 24px;
+  transition: filter 0.2s ease;
+}
+
+.sidebar-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  color: inherit;
+}
+
+.sidebar-item.active {
+  background-color: #efcbff;
+  color: #2A1989;
+  font-weight: bold;
+}
+
+/* Hover state for icon and text */
+.sidebar-item:hover .sidebar-icon img {
+  filter: brightness(0) saturate(100%) invert(14%) sepia(72%) saturate(3103%) hue-rotate(246deg) brightness(91%) contrast(96%);
+}
+
+.sidebar-item:hover .sidebar-text {
+  color: #2A1989;
+}
+
+/* Active state for icon and text */
+.sidebar-item.active .sidebar-icon img {
+  filter: brightness(0) saturate(100%) invert(14%) sepia(72%) saturate(3103%) hue-rotate(246deg) brightness(91%) contrast(96%);
+}
+
+.sidebar-item.active .sidebar-text {
+  color: #2A1989;
+}
+
+.sidebar-text .MuiTypography-root {
+  font-size: 16px;
+  white-space: nowrap;
+  color: inherit;
+  transition: color 0.2s ease;
+}
