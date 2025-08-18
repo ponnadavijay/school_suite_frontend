@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
 import { useAuth } from "../../../context/AuthContext";
 
@@ -56,10 +56,8 @@ const setAuthHeader = (token: string) => {
 };
 
 // Get all teachers
-const fetchTeachers = async (organizationId?: number): Promise<Teacher[]> => {
-  const response = await api.post("/teacher/teachers/list", {
-    organization: organizationId,
-  });
+const fetchTeachers = async (organizationId: number): Promise<Teacher[]> => {
+  const response = await api.get(`/teacher/teachers/list/${organizationId}/`);
   return response.data;
 };
 
@@ -77,10 +75,10 @@ const createTeacher = async (payload: CreateTeacherPayload): Promise<Teacher> =>
 
 // Update teacher
 const updateTeacher = async ({
-  id,
+  teacher_id,
   ...payload
 }: UpdateTeacherPayload): Promise<Teacher> => {
-  const response = await api.put(`/teacher/teachers/update/${id}/`, payload);
+  const response = await api.put(`/teacher/teachers/update/${teacher_id}/`, payload);
   return response.data;
 };
 
@@ -95,6 +93,11 @@ export const useTeachers = (organizationId?: number) => {
       return fetchTeachers(organizationId);
     },
     enabled: !!accessToken,
+    keepPreviousData: true,
+    staleTime: 0,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
   });
 };
 
@@ -108,27 +111,50 @@ export const useTeacher = (teacherId: number) => {
       return fetchTeacher(teacherId);
     },
     enabled: !!accessToken && !!teacherId,
+    keepPreviousData: true,
+    staleTime: 0,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
   });
 };
 
-export const useCreateTeacher = () => {
+export const useCreateTeacher = (organizationId?: number) => {
   const { accessToken } = useAuth();
+  const queryClient = useQueryClient();
 
   return useMutation<Teacher, ApiError, CreateTeacherPayload>({
     mutationFn: (payload) => {
       if (accessToken) setAuthHeader(accessToken);
       return createTeacher(payload);
     },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["teachers", organizationId] });
+    },
+    keepPreviousData: true,
+    staleTime: 0,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
   });
 };
 
-export const useUpdateTeacher = () => {
+export const useUpdateTeacher = (organizationId?: number) => {
   const { accessToken } = useAuth();
+  const queryClient = useQueryClient();
 
   return useMutation<Teacher, ApiError, UpdateTeacherPayload>({
     mutationFn: (payload) => {
       if (accessToken) setAuthHeader(accessToken);
       return updateTeacher(payload);
     },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["teachers", organizationId] });
+    },
+    keepPreviousData: true,
+    staleTime: 0,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
   });
 };

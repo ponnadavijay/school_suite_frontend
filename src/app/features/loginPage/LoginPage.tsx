@@ -2,8 +2,6 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Button,
-  Checkbox,
-  FormControlLabel,
   Card,
   Box,
   IconButton,
@@ -118,10 +116,7 @@ const LoginPage: React.FC = () => {
               }}
               className="login-input"
             />
-            <FormControlLabel
-              control={<Checkbox value="remember" color="primary" />}
-              label="Remember me"
-            />
+            <div className="login-button-container">
             {signInError && <Alert severity="error">{signInError}</Alert>}
             <Button
               type="submit"
@@ -133,8 +128,9 @@ const LoginPage: React.FC = () => {
             >
               {loginMutation.isLoading ? "Signing in..." : "Sign In"}
             </Button>
+            </div>
             <Box className="login-links">
-              <Link to="/register">{"Don't have an account? Sign Up"}</Link>
+              <Link to="/register" className="registher-link">{"Don't have an account? Sign Up"}</Link>
             </Box>
           </Box>
         </Box>

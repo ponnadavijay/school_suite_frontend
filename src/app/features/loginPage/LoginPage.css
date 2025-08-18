@@ -33,7 +33,7 @@
 }
 
 .login-button {
-    margin-top: 20px;
+    height: 2.5rem;
     color: #000;
 }
 
@@ -43,4 +43,22 @@
     display: flex;
     justify-content: space-between;
     width: 100%;
+    color: #000 !important;
+}
+
+.login-button-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    width: 100%;
+    gap: 10px;
+    margin-top: 1rem;
+}
+
+.registher-link {
+    display: flex;
+    font-size: var(--default-font-size);
+    font-family: var(--font-family-secondary);
+    color: #000;
 }

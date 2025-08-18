@@ -1,13 +1,20 @@
 import React, { useState, useEffect } from "react";
-import { Box, Button, TextField, Typography, IconButton, MenuItem } from "@mui/material";
+import {
+  Box,
+  Button,
+  TextField,
+  IconButton,
+  MenuItem,
+} from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { useAuth } from "../../../context/AuthContext";
 import "./CreateParent.css";
-import { useCreateParent } from "../parentApi/parentApi";
+import { useCreateParent, useUpdateParent } from "../parentApi/parentApi";
 
 interface CreateParentProps {
   onClose: () => void;
   onParentCreated: (parent: any) => void;
+  parentData?: any;
 }
 
 const relationOptions = [
@@ -18,9 +25,14 @@ const relationOptions = [
   { value: "Guardian", label: "Guardian" },
 ];
 
-const CreateParent: React.FC<CreateParentProps> = ({ onClose, onParentCreated }) => {
+const CreateParent: React.FC<CreateParentProps> = ({
+  onClose,
+  onParentCreated,
+  parentData,
+}) => {
   const { user } = useAuth();
-  const { mutate: createParent, isPending, isError, error } = useCreateParent();
+  const { mutate: createParent, isPending: creating } = useCreateParent();
+  const { mutate: updateParent, isPending: updating } = useUpdateParent();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -39,30 +51,47 @@ const CreateParent: React.FC<CreateParentProps> = ({ onClose, onParentCreated })
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  // Prefill if editing
   useEffect(() => {
-    if (user?.organization) {
-      setFormData(prev => ({
+    if (parentData) {
+      setFormData({
+        ...formData,
+        ...parentData,
+        organization: parentData.organization?.toString() || user?.organization?.toString() || "",
+        role: parentData.role?.toString() || "",
+        pincode: parentData.pincode?.toString() || "",
+      });
+    } else if (user?.organization) {
+      setFormData((prev) => ({
         ...prev,
         organization: user.organization.toString(),
-        role: "5", // Assuming 5 is the parent role
+        role: "",
       }));
     }
-  }, [user]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [parentData, user]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    if (errors[name]) setErrors(prev => ({ ...prev, [name]: "" }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
     const requiredFields = [
-      "name", "email", "relation", "address_1", "city", 
-      "state", "pincode", "mobile_no", "whatsapp_no"
+      "name",
+      "email",
+      "relation",
+      "address_1",
+      "city",
+      "state",
+      "pincode",
+      "mobile_no",
+      "whatsapp_no",
     ];
 
-    requiredFields.forEach(field => {
+    requiredFields.forEach((field) => {
       if (!formData[field as keyof typeof formData]) {
         newErrors[field] = "This field is required";
       }
@@ -96,40 +125,68 @@ const CreateParent: React.FC<CreateParentProps> = ({ onClose, onParentCreated })
       pincode: Number(formData.pincode),
     };
 
-    createParent(payload, {
-      onSuccess: (data) => {
-        onParentCreated(data);
-        onClose();
-      },
-    });
+    if (parentData) {
+      // update
+      updateParent(
+        { parent_id: parentData.id, ...payload },
+        {
+          onSuccess: (data) => {
+            onParentCreated(data);
+            onClose();
+          },
+        }
+      );
+    } else {
+      // create
+      createParent(payload, {
+        onSuccess: (data) => {
+          onParentCreated(data);
+          onClose();
+        },
+      });
+    }
   };
+
+  const isEdit = !!parentData;
 
   return (
     <Box className="create-parent-container">
       <Box className="create-parent-header">
-        <Typography variant="h6">Create New Parent</Typography>
+        <div>{isEdit ? "Update Parent" : "Create New Parent"}</div>
         <IconButton onClick={onClose}>
           <CloseIcon />
         </IconButton>
       </Box>
-      
-      <Box component="form" onSubmit={handleSubmit} className="create-parent-form">
+
+      <Box
+        component="form"
+        id="create-parent-form"
+        onSubmit={handleSubmit}
+        className="create-parent-form"
+      >
         {[
           { label: "Full Name", name: "name", type: "text", maxLength: 200 },
           { label: "Email", name: "email", type: "email", maxLength: 254 },
-          { 
-            label: "Relation", 
-            name: "relation", 
+          {
+            label: "Relation",
+            name: "relation",
             type: "select",
-            options: relationOptions 
+            options: relationOptions,
           },
           { label: "Mobile Number", name: "mobile_no", type: "text", maxLength: 10 },
           { label: "WhatsApp Number", name: "whatsapp_no", type: "text", maxLength: 10 },
           { label: "Address Line 1", name: "address_1", type: "text", maxLength: 200 },
-          { label: "Address Line 2", name: "address_2", type: "text", maxLength: 200, required: false },
+          {
+            label: "Address Line 2",
+            name: "address_2",
+            type: "text",
+            maxLength: 200,
+            required: false,
+          },
           { label: "City", name: "city", type: "text", maxLength: 200 },
           { label: "State", name: "state", type: "text", maxLength: 200 },
           { label: "Pincode", name: "pincode", type: "text", maxLength: 6 },
+          { label: "Role", name: "role", type: "text" },
         ].map((field) => (
           <Box key={field.name} mb={2}>
             {field.type === "select" ? (
@@ -169,25 +226,25 @@ const CreateParent: React.FC<CreateParentProps> = ({ onClose, onParentCreated })
       </Box>
 
       <Box className="create-parent-footer">
-        <Button variant="outlined" onClick={onClose} disabled={isPending}>
+        <Button variant="outlined" onClick={onClose} disabled={creating || updating}>
           Cancel
         </Button>
         <Button
           type="submit"
           variant="contained"
           color="primary"
-          disabled={isPending}
+          disabled={creating || updating}
           form="create-parent-form"
         >
-          {isPending ? "Creating..." : "Create Parent"}
+          {creating || updating
+            ? isEdit
+              ? "Updating..."
+              : "Creating..."
+            : isEdit
+            ? "Update Parent"
+            : "Create Parent"}
         </Button>
       </Box>
-
-      {isError && (
-        <Typography color="error" sx={{ mt: 2 }}>
-          {error?.message || "Failed to create parent"}
-        </Typography>
-      )}
     </Box>
   );
 };

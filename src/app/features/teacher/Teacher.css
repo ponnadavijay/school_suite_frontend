@@ -11,3 +11,10 @@
   border-radius: 8px;
   margin-bottom: 20px;
 }
+
+.list-header-title {
+  font-size: 1.5rem;
+  font-weight: var(--bold-font-weight);
+  color: var(--primary-purple-600);
+  font-family: var(--font-family);
+} 

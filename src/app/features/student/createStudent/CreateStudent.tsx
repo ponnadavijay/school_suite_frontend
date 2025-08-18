@@ -32,7 +32,7 @@ const CreateStudent: React.FC<CreateStudentProps> = ({
             setFormData((prev) => ({
                 ...prev,
                 organization: user.organization.toString(),
-                role: "4", // Assuming 4 is the student role
+                role: "4",
             }));
         }
     }, [user]);
@@ -98,7 +98,7 @@ const CreateStudent: React.FC<CreateStudentProps> = ({
     return (
         <Box className="create-student-container">
             <Box className="create-student-header">
-                <Typography variant="h6">Register New Student</Typography>
+                <div>Register New Student</div>
                 <IconButton onClick={onClose}>
                     <CloseIcon />
                 </IconButton>

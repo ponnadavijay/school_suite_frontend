@@ -4,58 +4,46 @@
     font-family: sans-serif;
 }
 
+.sidebar-open .sidebar {
+    width: 240px;
+}
 
-.sidebar.collapsed {
+.sidebar-closed .sidebar {
     width: 80px;
 }
 
-.sidebar-header {
-    font-size: 18px;
-    padding: 1rem;
-}
-
-.sidebar-menu {
-    list-style-type: none;
-    padding: 0 1rem;
-}
-
-.sidebar-menu li {
-    padding: 10px 0;
-    cursor: pointer;
-}
-
-/* Main Content */
 .main-content {
     flex-grow: 1;
-    background-color: white;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
 }
 
-.menu-toggle {
-    font-size: 20px;
-    background: none;
-    border: none;
-    color: #000000;
-    cursor: pointer;
+.toolbar {
+    flex-shrink: 0;
 }
 
-.toolbar-right {
-    display: flex;
-    align-items: center;
-    gap: 15px;
+/* Scrollable Outlet content */
+.dashboard-content-scroll {
+    flex-grow: 1;
+    overflow-y: auto;
 }
 
-.logout-btn {
-    background-color: #e74c3c;
-    border: none;
-    color: white;
-    padding: 6px 12px;
-    border-radius: 4px;
-    cursor: pointer;
+/* Custom scrollbar for dashboard content */
+.dashboard-content-scroll::-webkit-scrollbar {
+    width: 6px;
 }
 
-/* Dashboard Content */
-.dashboard-content {
-    padding: 20px;
+.dashboard-content-scroll::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.dashboard-content-scroll::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 3px;
+}
+
+.dashboard-content-scroll::-webkit-scrollbar-thumb:hover {
+    background: #555;
 }

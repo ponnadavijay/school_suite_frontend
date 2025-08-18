@@ -4,7 +4,6 @@ import {
   Button,
   Drawer,
   Typography,
-  Container,
   Paper,
   Table,
   TableBody,
@@ -12,23 +11,33 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  IconButton
+  IconButton,
+  CircularProgress,
 } from "@mui/material";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import CreateTeacher from "./createTeacher/CreateTeacher";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import "./Teacher.css";
-import { useTeachers } from "./teacherApi/TeacherApi";
+import { useTeachers, useCreateTeacher, useUpdateTeacher } from "./teacherApi/TeacherApi";
 import { useAuth } from "../../context/AuthContext";
 
 const Teacher: React.FC = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editTeacher, setEditTeacher] = useState<any>(null);
   const { user } = useAuth();
-  const organizationId = user?.organization?.id;
-  
+  const organizationId = user?.organization;
 
-  const { data: teachers = [], isLoading, isError } = useTeachers(organizationId);
+  const { 
+    data: teachers = [], 
+    isLoading, 
+    isError,
+    refetch: refetchTeachers 
+  } = useTeachers(organizationId);
+
+  const createTeacherMutation = useCreateTeacher();
+  const updateTeacherMutation = useUpdateTeacher();
 
   const handleOpenDrawer = () => {
     setDrawerOpen(true);
@@ -44,25 +53,62 @@ const Teacher: React.FC = () => {
     setDrawerOpen(true);
   };
 
+  const handleSubmit = async (teacherData: any) => {
+    try {
+      if (editTeacher) {
+        // Update existing teacher
+        await updateTeacherMutation.mutateAsync({
+          teacher_id: editTeacher.teacher_id,
+          ...teacherData
+        });
+        toast.success("Teacher updated successfully!");
+      } else {
+        // Create new teacher
+        await createTeacherMutation.mutateAsync({
+          ...teacherData,
+          organization: organizationId
+        });
+        toast.success("Teacher created successfully!");
+      }
+      refetchTeachers();
+      handleCloseDrawer();
+    } catch (error) {
+      toast.error("An error occurred. Please try again.");
+    }
+  };
+
   return (
     <Box className="teacher-page">
       <Box className="teacher-header">
-        <Typography variant="h4" gutterBottom>
+        <div className="list-header-title">
           Teachers
-        </Typography>
+        </div>
         <Button
           variant="contained"
           color="primary"
           startIcon={<AddIcon />}
           onClick={handleOpenDrawer}
+          disabled={isLoading}
         >
           Create Teacher
         </Button>
       </Box>
 
-      <Container maxWidth="lg" sx={{ mt: 2 }}>
-        {isLoading && <Typography>Loading...</Typography>}
-        {isError && <Typography color="error">Failed to load teachers</Typography>}
+      <Box>
+        {isLoading && (
+          <Box display="flex" justifyContent="center" p={4}>
+            <CircularProgress />
+          </Box>
+        )}
+        {isError && (
+          <Typography color="error" p={2}>
+            Failed to load teachers
+          </Typography>
+        )}
+
+        {!isLoading && teachers.length === 0 && (
+          <Typography p={2}>No teachers found</Typography>
+        )}
 
         {!isLoading && teachers.length > 0 && (
           <TableContainer component={Paper}>
@@ -86,7 +132,11 @@ const Teacher: React.FC = () => {
                       {teacher.qualification || "-"}
                     </TableCell>
                     <TableCell sx={{ border: "1px solid rgba(224, 224, 224, 1)" }}>
-                      <IconButton color="primary" onClick={() => handleEditClick(teacher)}>
+                      <IconButton 
+                        color="primary" 
+                        onClick={() => handleEditClick(teacher)}
+                        disabled={updateTeacherMutation.isLoading}
+                      >
                         <EditIcon />
                       </IconButton>
                     </TableCell>
@@ -96,7 +146,7 @@ const Teacher: React.FC = () => {
             </Table>
           </TableContainer>
         )}
-      </Container>
+      </Box>
 
       <Drawer
         anchor="right"
@@ -106,8 +156,9 @@ const Teacher: React.FC = () => {
       >
         <CreateTeacher
           onClose={handleCloseDrawer}
-          onTeacherCreated={() => { }}
+          onSubmit={handleSubmit}
           teacherData={editTeacher}
+          isLoading={editTeacher ? updateTeacherMutation.isLoading : createTeacherMutation.isLoading}
         />
       </Drawer>
     </Box>

@@ -1,11 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate, Outlet, useLocation } from "react-router-dom";
-import { Box, CssBaseline } from "@mui/material";
 import Sidebar from "../sidebar/Sidebar";
 import Toolbar from "../toolbar/Toolbar";
-
-const drawerWidthOpen = 240;
-const drawerWidthClosed = 80;
+import "./Dashboard.css";
 
 const Dashboard: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -26,33 +23,24 @@ const Dashboard: React.FC = () => {
   };
 
   return (
-    <Box sx={{ display: "flex" }}>
-      <CssBaseline />
+    <div className={`dashboard-container ${sidebarOpen ? "sidebar-open" : "sidebar-closed"}`}>
       <Sidebar
         isOpen={sidebarOpen}
         onItemClick={handleNavigate}
         currentPath={location.pathname}
       />
 
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          width: `calc(100% - ${sidebarOpen ? drawerWidthOpen : drawerWidthClosed}px)`,
-          transition: theme => theme.transitions.create('width', {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.enteringScreen,
-          }),
-        }}
-      >
+      <div className="main-content">
         <Toolbar
           onToggleSidebar={toggleSidebar}
           onLogout={handleLogout}
         />
 
-        <Outlet />
-      </Box>
-    </Box>
+        <div className="dashboard-content-scroll">
+          <Outlet />
+        </div>
+      </div>
+    </div>
   );
 };
 
