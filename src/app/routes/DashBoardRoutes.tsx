@@ -1,10 +1,10 @@
 import type { RouteObject } from "react-router";
-import Home from "../features/home/Home";
+import DashBoardPage from "../pages/DashBoardPage";
 
 const DashBoardRoutes: RouteObject[] = [
   {
     index: true,
-    element: <Home />,
+    element: <DashBoardPage />,
   },
 ];
 

@@ -4,7 +4,6 @@ import {
   Button,
   Drawer,
   Typography,
-  Container,
   Paper,
   Table,
   TableBody,
@@ -18,17 +17,20 @@ import CreateTeacher from "./createTeacher/CreateTeacher";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import "./Teacher.css";
-import { useTeachers } from "./teacherApi/TeacherApi";
+import { useGetAllTeachers } from "./teacherApi/TeacherApi";
 import { useAuth } from "../../context/AuthContext";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import { useNavigate } from "react-router-dom";
 
 const Teacher: React.FC = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editTeacher, setEditTeacher] = useState<any>(null);
   const { user } = useAuth();
-  const organizationId = user?.organization?.id;
-  
+  const organizationId = user?.organization;
+  const navigate = useNavigate();
 
-  const { data: teachers = [], isLoading, isError } = useTeachers(organizationId);
+
+  const { data: teachers = [], isLoading, isError } = useGetAllTeachers(organizationId);
 
   const handleOpenDrawer = () => {
     setDrawerOpen(true);
@@ -60,7 +62,7 @@ const Teacher: React.FC = () => {
         </Button>
       </Box>
 
-      <Container maxWidth="lg" sx={{ mt: 2 }}>
+      <div>
         {isLoading && <Typography>Loading...</Typography>}
         {isError && <Typography color="error">Failed to load teachers</Typography>}
 
@@ -86,6 +88,12 @@ const Teacher: React.FC = () => {
                       {teacher.qualification || "-"}
                     </TableCell>
                     <TableCell sx={{ border: "1px solid rgba(224, 224, 224, 1)" }}>
+                      <IconButton
+                        onClick={() => navigate(`/teacher/view/${teacher.teacher_id}`)}
+                        color="primary"
+                      >
+                        <VisibilityIcon />
+                      </IconButton>
                       <IconButton color="primary" onClick={() => handleEditClick(teacher)}>
                         <EditIcon />
                       </IconButton>
@@ -96,7 +104,7 @@ const Teacher: React.FC = () => {
             </Table>
           </TableContainer>
         )}
-      </Container>
+      </div>
 
       <Drawer
         anchor="right"

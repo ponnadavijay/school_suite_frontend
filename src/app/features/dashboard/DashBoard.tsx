@@ -1,57 +1,76 @@
-import React, { useState } from "react";
-import { useNavigate, Outlet, useLocation } from "react-router-dom";
-import { Box, CssBaseline } from "@mui/material";
-import Sidebar from "../sidebar/Sidebar";
-import Toolbar from "../toolbar/Toolbar";
-
-const drawerWidthOpen = 240;
-const drawerWidthClosed = 80;
+import React from "react";
+import { useAuth } from "../../context/AuthContext";
+import { Card, CardContent, Grid, Box } from "@mui/material";
+import PeopleIcon from "@mui/icons-material/People";
+import SchoolIcon from "@mui/icons-material/School";
+import FamilyRestroomIcon from "@mui/icons-material/FamilyRestroom";
+import "./Dashboard.css";
 
 const Dashboard: React.FC = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const navigate = useNavigate();
-  const location = useLocation();
+  const { user } = useAuth();
 
-  const handleLogout = () => {
-    localStorage.clear();
-    navigate("/login");
+  const counts = {
+    teachers: 24,
+    students: 156,
+    parents: 132
   };
 
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
-
-  const handleNavigate = (path: string) => {
-    navigate(path);
-  };
+  const cards = [
+    {
+      title: "Teachers",
+      count: counts.teachers,
+      icon: <SchoolIcon className="card-icon" />,
+      bgColor: "var(--primary-purple-500)"
+    },
+    {
+      title: "Students",
+      count: counts.students,
+      icon: <PeopleIcon className="card-icon" />,
+      bgColor: "var(--primary-purple-500)"
+    },
+    {
+      title: "Parents",
+      count: counts.parents,
+      icon: <FamilyRestroomIcon className="card-icon" />,
+      bgColor: "var(--primary-purple-500)"
+    }
+  ];
 
   return (
-    <Box sx={{ display: "flex" }}>
-      <CssBaseline />
-      <Sidebar
-        isOpen={sidebarOpen}
-        onItemClick={handleNavigate}
-        currentPath={location.pathname}
-      />
+    <Box className="home-container">
+      <div className="greeting-text">
+        Hello, {user?.email}
+      </div>
+      <div className="subtitle-text">
+        Track and manage your teachers, students, and attendance.
+      </div>
 
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          width: `calc(100% - ${sidebarOpen ? drawerWidthOpen : drawerWidthClosed}px)`,
-          transition: theme => theme.transitions.create('width', {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.enteringScreen,
-          }),
-        }}
-      >
-        <Toolbar
-          onToggleSidebar={toggleSidebar}
-          onLogout={handleLogout}
-        />
-
-        <Outlet />
-      </Box>
+      <div>Key Matrics</div>
+      <Grid container spacing={3} className="cards-grid">
+        {cards.map((card) => (
+          <div>
+            <Card className="dashboard-card">
+              <CardContent className="card-content">
+                <div className="card-main-content">
+                  <div className="card-text">
+                    <div className="card-icon-container" style={{ backgroundColor: card.bgColor }}>
+                      {card.icon}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="card-title">
+                      {card.title}
+                    </div>
+                    <div className="card-value-container">
+                      <div className="card-value">{card.count}</div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        ))}
+      </Grid>
     </Box>
   );
 };

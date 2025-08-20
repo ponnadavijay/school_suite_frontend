@@ -1,5 +1,5 @@
 .teacher-page {
-  padding: 16px;
+  overflow-y: auto;
 }
 
 .teacher-header {

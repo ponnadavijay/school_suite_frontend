@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
 import { useAuth } from "../../../context/AuthContext";
 
@@ -40,13 +40,22 @@ export interface CreateTeacherPayload {
   role: number;
 }
 
-export interface UpdateTeacherPayload extends Partial<CreateTeacherPayload> {
-  id: number;
+export interface UpdateTeacherPayload {
+  teacher_id: number;
+  name?: string;
+  qualification?: string;
+  mobile_no?: string;
+  whatsapp_no?: string;
+  address_1?: string;
+  address_2?: string;
+  city?: string;
+  state?: string;
+  pincode?: number;
+  email?: string;
+  organization?: number;
+  role?: number;
 }
 
-type ApiError = AxiosError<{ detail?: string }>;
-
-// ================== API Functions ==================
 const api = axios.create({
   baseURL: BASE_URL,
 });
@@ -56,10 +65,8 @@ const setAuthHeader = (token: string) => {
 };
 
 // Get all teachers
-const fetchTeachers = async (organizationId?: number): Promise<Teacher[]> => {
-  const response = await api.post("/teacher/teachers/list", {
-    organization: organizationId,
-  });
+const fetchAllTeachers = async (organizationId?: number): Promise<Teacher[]> => {
+  const response = await api.get(`/teacher/teachers/list/${organizationId}`);
   return response.data;
 };
 
@@ -77,58 +84,95 @@ const createTeacher = async (payload: CreateTeacherPayload): Promise<Teacher> =>
 
 // Update teacher
 const updateTeacher = async ({
-  id,
+  teacher_id,
   ...payload
 }: UpdateTeacherPayload): Promise<Teacher> => {
-  const response = await api.put(`/teacher/teachers/update/${id}/`, payload);
+  const response = await api.put(`/teacher/teachers/update/${teacher_id}/`, payload);
+  return response.data;
+};
+
+const fetchOneTeacher = async (teacherId: number): Promise<Teacher> => {
+  const response = await api.get(`/teacher/teachers/retrieve/${teacherId}/`);
   return response.data;
 };
 
 // ================== React Query Hooks ==================
-export const useTeachers = (organizationId?: number) => {
+export const useGetAllTeachers = (organizationId?: number) => {
   const { accessToken } = useAuth();
 
-  return useQuery<Teacher[], ApiError>({
+  return useQuery<Teacher[]>({
     queryKey: ["teachers", organizationId],
     queryFn: () => {
       if (accessToken) setAuthHeader(accessToken);
-      return fetchTeachers(organizationId);
+      return fetchAllTeachers(organizationId);
     },
-    enabled: !!accessToken,
+    enabled: !!accessToken && !!organizationId,
+    keepPreviousData: true,
+    staleTime: 0,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
   });
 };
 
-export const useTeacher = (teacherId: number) => {
+export const useGetRetriveTeacher = (teacherId: number) => {
   const { accessToken } = useAuth();
 
-  return useQuery<Teacher, ApiError>({
+  return useQuery<Teacher>({
     queryKey: ["teacher", teacherId],
     queryFn: () => {
       if (accessToken) setAuthHeader(accessToken);
       return fetchTeacher(teacherId);
     },
     enabled: !!accessToken && !!teacherId,
+    keepPreviousData: true,
+    staleTime: 0,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
   });
 };
 
 export const useCreateTeacher = () => {
   const { accessToken } = useAuth();
+  const queryClient = useQueryClient();
 
-  return useMutation<Teacher, ApiError, CreateTeacherPayload>({
-    mutationFn: (payload) => {
+  return useMutation<Teacher, Error, CreateTeacherPayload>({
+    mutationFn: async (payload) => {
       if (accessToken) setAuthHeader(accessToken);
       return createTeacher(payload);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["teachers"] });
     },
   });
 };
 
+// 🔹 Update Teacher Hook
 export const useUpdateTeacher = () => {
   const { accessToken } = useAuth();
+  const queryClient = useQueryClient();
 
-  return useMutation<Teacher, ApiError, UpdateTeacherPayload>({
-    mutationFn: (payload) => {
+  return useMutation<Teacher, Error, UpdateTeacherPayload>({
+    mutationFn: async (payload) => {
       if (accessToken) setAuthHeader(accessToken);
       return updateTeacher(payload);
     },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["teachers"] });
+    },
+  });
+};
+
+export const useGetOneTeacher = (teacherId: number) => {
+  const { accessToken } = useAuth();
+
+  return useQuery<Teacher>({
+    queryKey: ["teacher", teacherId],
+    queryFn: () => {
+      if (accessToken) setAuthHeader(accessToken);
+      return fetchOneTeacher(teacherId);
+    },
+    enabled: !!accessToken && !!teacherId,
   });
 };

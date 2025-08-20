@@ -18,10 +18,9 @@
 .create-student-form {
     display: flex;
     flex-direction: column;
-    gap: 20px;
     flex-grow: 1;
     overflow-y: auto;
-    padding-right: 8px; /* Prevent scrollbar overlap */
+    padding-right: 8px;
     height: auto;
 }
 

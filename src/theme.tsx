@@ -268,10 +268,10 @@ const theme = createTheme({
     MuiListItemIcon: {
       styleOverrides: {
         root: {
-          minWidth: "42px",
+          minWidth: "48px",
           color: "#000000de",
           "&.Mui-selected": {
-            color: "#2A1989", // Updated purple color
+            color: "#2A1989",
           },
         },
       },
