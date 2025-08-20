@@ -63,7 +63,7 @@ const Student: React.FC = () => {
         </Button>
       </div>
 
-      <Container maxWidth="lg" sx={{ mt: 2 }}>
+      <div>
         {isLoading ? (
           <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
             <CircularProgress />
@@ -117,7 +117,7 @@ const Student: React.FC = () => {
             No student data available.
           </Typography>
         )}
-      </Container>
+      </div>
 
       <Drawer
         anchor="right"

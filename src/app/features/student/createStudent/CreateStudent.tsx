@@ -3,7 +3,6 @@ import { Box, Button, TextField, Typography, IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { useAuth } from "../../../context/AuthContext";
 import "./CreateStudent.css";
-import { useRegisterStudent } from "../studentApi/StudentApi";
 
 interface CreateStudentProps {
     onClose: () => void;

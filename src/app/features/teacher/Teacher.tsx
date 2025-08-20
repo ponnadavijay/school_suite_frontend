@@ -20,6 +20,7 @@ import CreateTeacher from "./createTeacher/CreateTeacher";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import "./Teacher.css";
+import { useTeachers, useCreateTeacher, useUpdateTeacher } from "./teacherApi/TeacherApi";
 import { useGetAllTeachers } from "./teacherApi/TeacherApi";
 import { useAuth } from "../../context/AuthContext";
 import VisibilityIcon from "@mui/icons-material/Visibility";
@@ -30,6 +31,9 @@ const Teacher: React.FC = () => {
   const [editTeacher, setEditTeacher] = useState<any>(null);
   const { user } = useAuth();
   const organizationId = user?.organization;
+
+  const createTeacherMutation = useCreateTeacher();
+  const updateTeacherMutation = useUpdateTeacher();
   const navigate = useNavigate();
 
 

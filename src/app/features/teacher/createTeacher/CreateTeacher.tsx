@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Box, Button, TextField, IconButton } from "@mui/material";
+import { Box, Button, TextField, IconButton, Typography } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { useAuth } from "../../../context/AuthContext";
 import "./CreateTeacher.css";
@@ -131,9 +131,8 @@ const CreateTeacher: React.FC<CreateTeacherProps> = ({
       role: Number(formData.role),
       pincode: parseInt(formData.pincode),
     };
-    onSubmit(payload);
-  };
 
+    // Submit based on mode (edit or create)
     if (isEditMode) {
       updateTeacher(
         { teacher_id: teacherData.teacher_id, ...payload },
@@ -200,7 +199,7 @@ const CreateTeacher: React.FC<CreateTeacherProps> = ({
               label={field.label}
               name={field.name}
               type={field.type}
-              value={formData[field.name] || ""}
+              value={formData[field.name as keyof typeof formData] || ""}
               onChange={handleChange}
               error={!!errors[field.name]}
               helperText={errors[field.name] || ""}
