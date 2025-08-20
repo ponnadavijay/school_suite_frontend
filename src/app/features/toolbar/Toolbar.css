@@ -7,6 +7,9 @@
     height: 65px;
     border-bottom: 1px solid lightgray;
     background-color: #ffffff;
+    position: sticky;
+    top: 0;
+    z-index: 1300;
 }
 
 .toolbar-header-and-btn {

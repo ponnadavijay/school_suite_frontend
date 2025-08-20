@@ -1,0 +1,80 @@
+.teacher-view-container {
+  padding: 24px;
+  display: flex;
+  justify-content: center;
+}
+
+.teacher-view-card {
+  width: 100%;
+  max-width: 800px;
+  border-radius: 16px !important;
+  box-shadow: 0px 6px 16px rgba(0, 0, 0, 0.1) !important;
+}
+
+.teacher-view-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e0e0e0;
+  background: #f9fafb;
+}
+
+.teacher-view-title {
+  font-size: 1.6rem !important;
+  font-weight: 600 !important;
+  color: #333 !important;
+}
+
+.teacher-view-close {
+  color: #666 !important;
+}
+
+.teacher-view-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.teacher-view-field {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px dashed #e0e0e0;
+}
+
+.teacher-view-label {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #555;
+  flex: 1;
+}
+
+.teacher-view-value {
+  font-size: 1rem;
+  font-weight: 400;
+  color: #222;
+  flex: 2;
+  text-align: right;
+}
+
+.teacher-view-actions {
+  margin-top: 24px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.teacher-view-btn {
+  min-width: 100px;
+}
+
+.teacher-view-loading,
+.teacher-view-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: 60px;
+}

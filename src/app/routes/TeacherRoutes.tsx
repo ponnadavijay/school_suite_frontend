@@ -1,6 +1,7 @@
 import type { RouteObject } from "react-router";
 import TeacherPage from "../pages/TeacherPage";
 import CreateTeacher from "../features/teacher/createTeacher/CreateTeacher";
+import TeacherView from "../features/teacher/viewTeacher/TeacherView";
 
 const TeacherRoutes: RouteObject[] = [
   {
@@ -10,6 +11,10 @@ const TeacherRoutes: RouteObject[] = [
   {
     path: "create-teacher",
     element: <CreateTeacher />
+  },
+  {
+    path: "/teacher/view/:id",
+    element: <TeacherView />
   },
 ];
 

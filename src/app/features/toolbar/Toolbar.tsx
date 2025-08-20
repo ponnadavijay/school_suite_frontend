@@ -1,5 +1,6 @@
 import React, { useState, useRef } from "react";
 import {
+  AppBar,
   Toolbar as MuiToolbar,
   IconButton,
   Avatar,
@@ -9,11 +10,16 @@ import {
   Box,
   Divider
 } from "@mui/material";
-import MenuIcon from "@mui/icons-material/Menu";
 import { useAuth } from "../../context/AuthContext";
+import MenuIcon from "@mui/icons-material/Menu";
 import "./Toolbar.css";
 
-const Toolbar: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar }) => {
+interface ToolbarProps {
+  sidebarOpen: boolean;
+  onToggleSidebar: () => void;
+}
+
+const Toolbar: React.FC<ToolbarProps> = ({ sidebarOpen, onToggleSidebar }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const { user, logout } = useAuth();
   const profileButtonRef = useRef<HTMLButtonElement>(null);
@@ -32,18 +38,29 @@ const Toolbar: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar })
   };
 
   return (
-    <MuiToolbar className="toolbar">
-      <IconButton
-        edge="start"
-        color="inherit"
-        onClick={onToggleSidebar}
-      >
-        <MenuIcon />
-      </IconButton>
-      <div className="toolbar-header-and-btn">
-        <div className="toolbar-title">
+    <AppBar 
+      position="fixed" 
+      sx={{ 
+        width: `calc(100% - ${sidebarOpen ? 240 : 80}px)`,
+        ml: `${sidebarOpen ? 240 : 80}px`,
+        zIndex: "1100",
+        boxShadow: "none",
+      }}
+    >
+      <MuiToolbar className="toolbar">
+        <IconButton
+          color="inherit"
+          aria-label="open drawer"
+          edge="start"
+           onClick={onToggleSidebar}
+          sx={{ mr: 1 }}
+        >
+          <MenuIcon />
+        </IconButton>
+        <div>
           Tech Patashala
         </div>
+        <Box sx={{ flexGrow: 1 }} />
         <div className="profile-container">
           <div
             ref={profileButtonRef}
@@ -83,8 +100,8 @@ const Toolbar: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar })
             </MenuItem>
           </Menu>
         </div>
-      </div>
-    </MuiToolbar>
+      </MuiToolbar>
+    </AppBar>
   );
 };
 

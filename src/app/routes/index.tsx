@@ -3,11 +3,13 @@ import LoginPageRoutes from "./LoginPageRoutes";
 import RegistrationRoutes from "./RegistrationRoutes";
 import DashBoardRoutes from "./DashBoardRoutes";
 import TeacherRoutes from "./TeacherRoutes";
-import DashBoardPage from "../pages/DashBoardPage";
 import LoginPage from "../features/loginPage/LoginPage";
 import StudentRoutes from "./StudentRoutes";
 import ParentRoutes from "./ParentRoutes";
+import Dashboard from "../features/dashboard/DashBoard";
+import Home from "../features/Home/Home";
 import PrivateRoute from "./PrivateRoute";
+
 
 const createRoutes = (): RouteObject[] => {
   return [
@@ -20,40 +22,31 @@ const createRoutes = (): RouteObject[] => {
       ],
     },
     {
-      path: "dashboard",
+      path: "/",
       element: (
         <PrivateRoute>
-          <DashBoardPage />
+          <Home />
         </PrivateRoute>
       ),
-      children: DashBoardRoutes,
-    },
-    {
-      path: "teacher",
-      element: (
-        <PrivateRoute>
-          <DashBoardPage />
-        </PrivateRoute>
-      ),
-      children: TeacherRoutes,
-    },
-    {
-      path: "student",
-      element: (
-        <PrivateRoute>
-          <DashBoardPage />
-        </PrivateRoute>
-      ),
-      children: StudentRoutes,
-    },
-    {
-      path: "parent",
-      element: (
-        <PrivateRoute>
-          <DashBoardPage />
-        </PrivateRoute>
-      ),
-      children: ParentRoutes,
+      children: [
+        {
+          path: "dashboard",
+          element: <Dashboard />,
+          children: DashBoardRoutes,
+        },
+        {
+          path: "teacher",
+          children: TeacherRoutes,
+        },
+        {
+          path: "student",
+          children: StudentRoutes,
+        },
+        {
+          path: "parent",
+          children: ParentRoutes,
+        },
+      ],
     },
   ];
 };
