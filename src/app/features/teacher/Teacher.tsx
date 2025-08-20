@@ -20,24 +20,20 @@ import CreateTeacher from "./createTeacher/CreateTeacher";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import "./Teacher.css";
-import { useTeachers, useCreateTeacher, useUpdateTeacher } from "./teacherApi/TeacherApi";
+import { useGetAllTeachers } from "./teacherApi/TeacherApi";
 import { useAuth } from "../../context/AuthContext";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import { useNavigate } from "react-router-dom";
 
 const Teacher: React.FC = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editTeacher, setEditTeacher] = useState<any>(null);
   const { user } = useAuth();
   const organizationId = user?.organization;
+  const navigate = useNavigate();
 
-  const { 
-    data: teachers = [], 
-    isLoading, 
-    isError,
-    refetch: refetchTeachers 
-  } = useTeachers(organizationId);
 
-  const createTeacherMutation = useCreateTeacher();
-  const updateTeacherMutation = useUpdateTeacher();
+  const { data: teachers = [], isLoading, isError } = useGetAllTeachers(organizationId);
 
   const handleOpenDrawer = () => {
     setDrawerOpen(true);
@@ -94,21 +90,9 @@ const Teacher: React.FC = () => {
         </Button>
       </Box>
 
-      <Box>
-        {isLoading && (
-          <Box display="flex" justifyContent="center" p={4}>
-            <CircularProgress />
-          </Box>
-        )}
-        {isError && (
-          <Typography color="error" p={2}>
-            Failed to load teachers
-          </Typography>
-        )}
-
-        {!isLoading && teachers.length === 0 && (
-          <Typography p={2}>No teachers found</Typography>
-        )}
+      <div>
+        {isLoading && <Typography>Loading...</Typography>}
+        {isError && <Typography color="error">Failed to load teachers</Typography>}
 
         {!isLoading && teachers.length > 0 && (
           <TableContainer component={Paper}>
@@ -132,11 +116,13 @@ const Teacher: React.FC = () => {
                       {teacher.qualification || "-"}
                     </TableCell>
                     <TableCell sx={{ border: "1px solid rgba(224, 224, 224, 1)" }}>
-                      <IconButton 
-                        color="primary" 
-                        onClick={() => handleEditClick(teacher)}
-                        disabled={updateTeacherMutation.isLoading}
+                      <IconButton
+                        onClick={() => navigate(`/teacher/view/${teacher.teacher_id}`)}
+                        color="primary"
                       >
+                        <VisibilityIcon />
+                      </IconButton>
+                      <IconButton color="primary" onClick={() => handleEditClick(teacher)}>
                         <EditIcon />
                       </IconButton>
                     </TableCell>
@@ -146,7 +132,7 @@ const Teacher: React.FC = () => {
             </Table>
           </TableContainer>
         )}
-      </Box>
+      </div>
 
       <Drawer
         anchor="right"

@@ -3,21 +3,25 @@ import { Box, Button, TextField, IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { useAuth } from "../../../context/AuthContext";
 import "./CreateTeacher.css";
+import { useCreateTeacher, useUpdateTeacher } from "../teacherApi/TeacherApi";
 
 interface CreateTeacherProps {
   onClose: () => void;
-  onSubmit: (data: any) => void;
-  teacherData?: any;
-  isLoading?: boolean;
+  onTeacherCreated: (teacher: any) => void;
+  teacherData?: any; // if present → edit mode
 }
 
 const CreateTeacher: React.FC<CreateTeacherProps> = ({
   onClose,
-  onSubmit,
+  onTeacherCreated,
   teacherData,
-  isLoading
 }) => {
   const { user } = useAuth();
+  const { mutate: createTeacher, isPending: isCreating } = useCreateTeacher();
+  const { mutate: updateTeacher, isPending: isUpdating } = useUpdateTeacher();
+
+  const isEditMode = !!teacherData;
+
   const [formData, setFormData] = useState({
     name: "",
     qualification: "",
@@ -35,8 +39,9 @@ const CreateTeacher: React.FC<CreateTeacherProps> = ({
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  // Pre-fill form when editing
   useEffect(() => {
-    if (teacherData) {
+    if (isEditMode && teacherData) {
       setFormData({
         name: teacherData.name || "",
         qualification: teacherData.qualification || "",
@@ -48,17 +53,21 @@ const CreateTeacher: React.FC<CreateTeacherProps> = ({
         state: teacherData.state || "",
         pincode: teacherData.pincode?.toString() || "",
         email: teacherData.email || "",
-        role: teacherData.role?.toString() || "",
-        organization: teacherData.organization?.toString() || "",
+        role: teacherData.role?.toString() || user?.role?.toString() || "",
+        organization:
+          teacherData.organization?.toString() ||
+          user?.organization?.toString() ||
+          "",
       });
-    } else if (user?.organization) {
+    } else if (user && user.organization && user.organization !== 0) {
+      // default values for create
       setFormData((prev) => ({
         ...prev,
         organization: user.organization.toString(),
         role: user.role.toString(),
       }));
     }
-  }, [teacherData, user]);
+  }, [teacherData, isEditMode, user]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -69,47 +78,123 @@ const CreateTeacher: React.FC<CreateTeacherProps> = ({
     }
   };
 
+  const validate = () => {
+    const newErrors: Record<string, string> = {};
+    const requiredFields: (keyof typeof formData)[] = [
+      "name",
+      "qualification",
+      "mobile_no",
+      "whatsapp_no",
+      "address_1",
+      "city",
+      "state",
+      "pincode",
+      "email",
+    ];
+
+    // Only require role in create mode
+    if (!isEditMode) {
+      requiredFields.push("role");
+    }
+
+    requiredFields.forEach((field) => {
+      if (!formData[field]) {
+        newErrors[field] = "This field is required";
+      }
+    });
+
+    if (formData.mobile_no && !/^\d{10}$/.test(formData.mobile_no)) {
+      newErrors.mobile_no = "Must be 10 digits";
+    }
+    if (formData.whatsapp_no && !/^\d{10}$/.test(formData.whatsapp_no)) {
+      newErrors.whatsapp_no = "Must be 10 digits";
+    }
+    if (formData.pincode && !/^\d{6}$/.test(formData.pincode)) {
+      newErrors.pincode = "Must be 6 digits";
+    }
+    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = "Invalid email format";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!validate()) return;
+
     const payload = {
       ...formData,
+      organization: user?.organization ?? 0,
       role: Number(formData.role),
-      pincode: formData.pincode ? parseInt(formData.pincode) : undefined,
-      organization: Number(formData.organization || user?.organization || 0),
+      pincode: parseInt(formData.pincode),
     };
     onSubmit(payload);
   };
 
-  const isEditMode = !!teacherData;
+    if (isEditMode) {
+      updateTeacher(
+        { teacher_id: teacherData.teacher_id, ...payload },
+        {
+          onSuccess: (data) => {
+            console.log("Teacher Updated Successfully:", data);
+            onTeacherCreated(data);
+            onClose();
+          },
+          onError: (err) => {
+            console.error("Failed to update teacher:", err);
+          },
+        }
+      );
+    } else {
+      createTeacher(payload, {
+        onSuccess: (data) => {
+          console.log("Teacher Created Successfully:", data);
+          onTeacherCreated(data);
+          onClose();
+        },
+        onError: (err) => {
+          console.error("Failed to create teacher:", err);
+        },
+      });
+    }
+  };
+
+  // Define form fields with conditional role field
+  const formFields = [
+    { label: "Full Name", name: "name", type: "text" },
+    { label: "Qualification", name: "qualification", type: "text" },
+    { label: "Email", name: "email", type: "email" },
+    { label: "Mobile Number", name: "mobile_no", type: "text", maxLength: 10 },
+    { label: "WhatsApp Number", name: "whatsapp_no", type: "text", maxLength: 10 },
+    { label: "Address Line 1", name: "address_1", type: "text" },
+    { label: "Address Line 2", name: "address_2", type: "text" },
+    // Only show role field in create mode
+    ...(!isEditMode ? [{ label: "Role", name: "role", type: "text" }] : []),
+    { label: "City", name: "city", type: "text" },
+    { label: "State", name: "state", type: "text" },
+    { label: "Pincode", name: "pincode", type: "text", maxLength: 6 },
+  ];
 
   return (
     <Box className="create-teacher-container">
       <Box className="create-teacher-header">
-        <div>
-          {isEditMode ? "Edit Teacher" : "Create New Teacher"}
-        </div>
+        <Typography variant="h6">
+          {isEditMode ? "Update Teacher" : "Create New Teacher"}
+        </Typography>
         <IconButton onClick={onClose}>
           <CloseIcon />
         </IconButton>
       </Box>
-      <form
+      <Box
+        component="form"
         onSubmit={handleSubmit}
         id="create-teacher-form"
         className="create-teacher-form"
       >
-        {[
-          { label: "Full Name", name: "name", type: "text" },
-          { label: "Qualification", name: "qualification", type: "text" },
-          { label: "Email", name: "email", type: "email" },
-          { label: "Mobile Number", name: "mobile_no", type: "text", maxLength: 10 },
-          { label: "WhatsApp Number", name: "whatsapp_no", type: "text", maxLength: 10 },
-          { label: "Address Line 1", name: "address_1", type: "text" },
-          { label: "Address Line 2", name: "address_2", type: "text" },
-          { label: "Role", name: "role", type: "text", disabled: isEditMode },
-          { label: "City", name: "city", type: "text" },
-          { label: "State", name: "state", type: "text" },
-          { label: "Pincode", name: "pincode", type: "text", maxLength: 6 },
-        ].map((field) => (
+        {formFields.map((field) => (
           <Box key={field.name} mb={2}>
             <TextField
               label={field.label}
@@ -119,16 +204,19 @@ const CreateTeacher: React.FC<CreateTeacherProps> = ({
               onChange={handleChange}
               error={!!errors[field.name]}
               helperText={errors[field.name] || ""}
-              required
+              required={!isEditMode || field.name !== "role"} // Don't require role in edit mode
               inputProps={field.maxLength ? { maxLength: field.maxLength } : undefined}
-              disabled={field.disabled}
               fullWidth
             />
           </Box>
         ))}
-      </form>
+      </Box>
       <Box className="create-teacher-footer">
-        <Button variant="outlined" onClick={onClose} disabled={isLoading}>
+        <Button
+          variant="outlined"
+          onClick={onClose}
+          disabled={isCreating || isUpdating}
+        >
           Cancel
         </Button>
         <Button
@@ -136,15 +224,15 @@ const CreateTeacher: React.FC<CreateTeacherProps> = ({
           variant="contained"
           color="primary"
           form="create-teacher-form"
-          disabled={isLoading}
+          disabled={isCreating || isUpdating}
         >
-          {isEditMode
-            ? isLoading
+          {isCreating || isUpdating
+            ? isEditMode
               ? "Updating..."
-              : "Update Teacher"
-            : isLoading
-              ? "Creating..."
-              : "Create Teacher"}
+              : "Creating..."
+            : isEditMode
+            ? "Update Teacher"
+            : "Create Teacher"}
         </Button>
       </Box>
     </Box>
