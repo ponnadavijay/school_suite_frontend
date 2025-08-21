@@ -66,7 +66,7 @@ const setAuthHeader = (token: string) => {
 
 // Get all teachers
 const fetchAllTeachers = async (organizationId?: number): Promise<Teacher[]> => {
-  const response = await api.get(`/teacher/teachers/list/${organizationId}`);
+  const response = await api.get(`/teacher/teachers/list/${organizationId}/`);
   return response.data;
 };
 

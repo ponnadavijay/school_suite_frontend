@@ -37,6 +37,11 @@ const setAuthHeader = (token: string) => {
 
 // ================== API Functions ==================
 
+const createStudent = async (payload: CreateStudentPayload): Promise<Student> => {
+  const response = await api.post(`/users/api/register/student`, payload);
+  return response.data;
+};
+
 const fetchStudents = async (organizationId: number): Promise<Student[]> => {
   const response = await api.get(`/student/Students/list/${organizationId}/`);
   return response.data;
@@ -112,6 +117,22 @@ export const useStudent = (admission_no?: number) => {
     refetchOnMount: true,
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
+  });
+};
+
+export const useRegisterStudent = () => {
+  const { accessToken } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation<Student, ApiError, CreateStudentPayload>({
+    mutationFn: (payload) => {
+      if (accessToken) setAuthHeader(accessToken);
+      return createStudent(payload);
+    },
+    onSuccess: () => {
+      // Invalidate student list so it refreshes after a new student is added
+      queryClient.invalidateQueries({ queryKey: ["students"] });
+    },
   });
 };
 

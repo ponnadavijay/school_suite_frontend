@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   Box,
   Button,
@@ -13,31 +13,38 @@ import {
   TableRow,
   IconButton,
   CircularProgress,
+  TextField,
 } from "@mui/material";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import CreateTeacher from "./createTeacher/CreateTeacher";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
-import "./Teacher.css";
-import { useTeachers, useCreateTeacher, useUpdateTeacher } from "./teacherApi/TeacherApi";
-import { useGetAllTeachers } from "./teacherApi/TeacherApi";
-import { useAuth } from "../../context/AuthContext";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import { useCreateTeacher, useUpdateTeacher, useGetAllTeachers } from "./teacherApi/TeacherApi";
+import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import "./Teacher.css";
 
 const Teacher: React.FC = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editTeacher, setEditTeacher] = useState<any>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+
   const { user } = useAuth();
   const organizationId = user?.organization;
+  const navigate = useNavigate();
 
   const createTeacherMutation = useCreateTeacher();
   const updateTeacherMutation = useUpdateTeacher();
-  const navigate = useNavigate();
 
-
-  const { data: teachers = [], isLoading, isError } = useGetAllTeachers(organizationId);
+  // get all teachers
+  const {
+    data: teachers = [],
+    isLoading,
+    isError,
+    refetch: refetchTeachers,
+  } = useGetAllTeachers(organizationId);
 
   const handleOpenDrawer = () => {
     setDrawerOpen(true);
@@ -56,17 +63,15 @@ const Teacher: React.FC = () => {
   const handleSubmit = async (teacherData: any) => {
     try {
       if (editTeacher) {
-        // Update existing teacher
         await updateTeacherMutation.mutateAsync({
           teacher_id: editTeacher.teacher_id,
-          ...teacherData
+          ...teacherData,
         });
         toast.success("Teacher updated successfully!");
       } else {
-        // Create new teacher
         await createTeacherMutation.mutateAsync({
           ...teacherData,
-          organization: organizationId
+          organization: organizationId,
         });
         toast.success("Teacher created successfully!");
       }
@@ -77,12 +82,20 @@ const Teacher: React.FC = () => {
     }
   };
 
+  // ✅ filter teachers by search query
+  const filteredTeachers = useMemo(() => {
+    if (!searchQuery) return teachers;
+    return teachers.filter(
+      (teacher: any) =>
+        teacher.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        teacher.email?.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [teachers, searchQuery]);
+
   return (
     <Box className="teacher-page">
       <Box className="teacher-header">
-        <div className="list-header-title">
-          Teachers
-        </div>
+        <div className="list-header-title">Teachers</div>
         <Button
           variant="contained"
           color="primary"
@@ -94,11 +107,29 @@ const Teacher: React.FC = () => {
         </Button>
       </Box>
 
+      {/* ✅ Search Input */}
+      <Box sx={{ my: 2, display: "flex", justifyContent: "flex-start" }}>
+        <TextField
+          label="Search by Name or Email"
+          variant="outlined"
+          size="small"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          sx={{ width: 300 }}
+        />
+      </Box>
+
       <div>
-        {isLoading && <Typography>Loading...</Typography>}
+        {/* ✅ Proper loader */}
+        {isLoading && (
+          <Box display="flex" justifyContent="center" alignItems="center" height={200}>
+            <CircularProgress />
+          </Box>
+        )}
+
         {isError && <Typography color="error">Failed to load teachers</Typography>}
 
-        {!isLoading && teachers.length > 0 && (
+        {!isLoading && filteredTeachers.length > 0 && (
           <TableContainer component={Paper}>
             <Table sx={{ borderCollapse: "collapse" }}>
               <TableHead>
@@ -111,9 +142,11 @@ const Teacher: React.FC = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {teachers.map((teacher) => (
-                  <TableRow key={teacher.id}>
-                    <TableCell sx={{ border: "1px solid rgba(224, 224, 224, 1)" }}>{teacher.teacher_id}</TableCell>
+                {filteredTeachers.map((teacher: any) => (
+                  <TableRow key={teacher.teacher_id}>
+                    <TableCell sx={{ border: "1px solid rgba(224, 224, 224, 1)" }}>
+                      {teacher.teacher_id}
+                    </TableCell>
                     <TableCell sx={{ border: "1px solid rgba(224, 224, 224, 1)" }}>{teacher.name}</TableCell>
                     <TableCell sx={{ border: "1px solid rgba(224, 224, 224, 1)" }}>{teacher.email}</TableCell>
                     <TableCell sx={{ border: "1px solid rgba(224, 224, 224, 1)" }}>
@@ -136,8 +169,13 @@ const Teacher: React.FC = () => {
             </Table>
           </TableContainer>
         )}
+
+        {!isLoading && filteredTeachers.length === 0 && (
+          <Typography sx={{ mt: 2 }}>No teachers found.</Typography>
+        )}
       </div>
 
+      {/* Drawer for Create/Edit */}
       <Drawer
         anchor="right"
         open={drawerOpen}

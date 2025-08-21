@@ -77,24 +77,20 @@ const Student: React.FC = () => {
             <Table sx={{ borderCollapse: "collapse" }}>
               <TableHead>
                 <TableRow>
-                  <TableCell>ID</TableCell>
+                  <TableCell>Admission No</TableCell>
                   <TableCell>Name</TableCell>
                   <TableCell>Parent ID</TableCell>
                   <TableCell>Class Room</TableCell>
-                  <TableCell>Section</TableCell>
-                  <TableCell>Roll No</TableCell>
                   <TableCell>Action</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {students.map((student) => (
                   <TableRow key={student.id}>
-                    <TableCell>{student.id}</TableCell>
+                    <TableCell>{student.admission_no}</TableCell>
                     <TableCell>{student.name}</TableCell>
                     <TableCell>{student.parent}</TableCell>
-                    <TableCell>{student.class_name}</TableCell>
-                    <TableCell>{student.section}</TableCell>
-                    <TableCell>{student.roll_no}</TableCell>
+                    <TableCell>{student.class_room}</TableCell>
                     <TableCell>
                       <IconButton
                         color="primary"

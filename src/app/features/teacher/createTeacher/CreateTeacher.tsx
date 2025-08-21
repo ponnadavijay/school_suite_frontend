@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Box, Button, TextField, IconButton, Typography } from "@mui/material";
+import { Box, Button, TextField, IconButton, Typography, Alert } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { useAuth } from "../../../context/AuthContext";
 import "./CreateTeacher.css";
@@ -17,10 +17,11 @@ const CreateTeacher: React.FC<CreateTeacherProps> = ({
   teacherData,
 }) => {
   const { user } = useAuth();
-  const { mutate: createTeacher, isPending: isCreating } = useCreateTeacher();
-  const { mutate: updateTeacher, isPending: isUpdating } = useUpdateTeacher();
+  const { mutate: createTeacher, isPending: isCreating, error: createError } = useCreateTeacher();
+  const { mutate: updateTeacher, isPending: isUpdating, error: updateError } = useUpdateTeacher();
 
   const isEditMode = !!teacherData;
+  const error = isEditMode ? updateError : createError;
 
   const [formData, setFormData] = useState({
     name: "",
@@ -38,6 +39,44 @@ const CreateTeacher: React.FC<CreateTeacherProps> = ({
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [apiError, setApiError] = useState<string>("");
+
+  // Clear API errors when form changes
+  useEffect(() => {
+    if (apiError) {
+      setApiError("");
+    }
+  }, [formData]);
+
+  // Parse and display API errors
+  useEffect(() => {
+    if (error) {
+      if (error instanceof Error) {
+        try {
+          // Try to parse the error response
+          const errorData = JSON.parse(error.message);
+          if (errorData.data) {
+            const parsedData = typeof errorData.data === 'string' 
+              ? JSON.parse(errorData.data.replace(/'/g, '"')) 
+              : errorData.data;
+            
+            if (parsedData.email) {
+              setErrors(prev => ({ ...prev, email: parsedData.email[0] }));
+            } else {
+              setApiError("An error occurred. Please try again.");
+            }
+          } else {
+            setApiError(errorData.message || "An error occurred. Please try again.");
+          }
+        } catch (e) {
+          // If parsing fails, show generic error
+          setApiError("An error occurred. Please try again.");
+        }
+      } else {
+        setApiError("An error occurred. Please try again.");
+      }
+    }
+  }, [error]);
 
   // Pre-fill form when editing
   useEffect(() => {
@@ -73,6 +112,7 @@ const CreateTeacher: React.FC<CreateTeacherProps> = ({
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
 
+    // Clear field-specific errors when user starts typing
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
     }
@@ -122,6 +162,7 @@ const CreateTeacher: React.FC<CreateTeacherProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setApiError(""); // Clear previous API errors
 
     if (!validate()) return;
 
@@ -187,6 +228,14 @@ const CreateTeacher: React.FC<CreateTeacherProps> = ({
           <CloseIcon />
         </IconButton>
       </Box>
+      
+      {/* Display API error message */}
+      {apiError && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {apiError}
+        </Alert>
+      )}
+      
       <Box
         component="form"
         onSubmit={handleSubmit}
