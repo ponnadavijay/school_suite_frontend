@@ -20,15 +20,21 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "removeComments": true,
-    "types": ["@testing-library/jest-dom", "vitest/globals", "vite/client"]
+    "removeComments": true
   },
   "include": [
     "src",
     "contexts",
-    ".eslintrc.json",
     "vite-env.d.ts",
     "src/types",
     "custom.d.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/__tests__/**",
+    "**/__mocks__/**"
   ]
 }
