@@ -14,6 +14,7 @@ import {
   IconButton,
   CircularProgress,
   TextField,
+  TablePagination,
 } from "@mui/material";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -30,6 +31,8 @@ const Teacher: React.FC = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editTeacher, setEditTeacher] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const { user } = useAuth();
   const organizationId = user?.organization;
@@ -38,7 +41,6 @@ const Teacher: React.FC = () => {
   const createTeacherMutation = useCreateTeacher();
   const updateTeacherMutation = useUpdateTeacher();
 
-  // get all teachers
   const {
     data: teachers = [],
     isLoading,
@@ -82,7 +84,6 @@ const Teacher: React.FC = () => {
     }
   };
 
-  // ✅ filter teachers by search query
   const filteredTeachers = useMemo(() => {
     if (!searchQuery) return teachers;
     return teachers.filter(
@@ -91,6 +92,20 @@ const Teacher: React.FC = () => {
         teacher.email?.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [teachers, searchQuery]);
+
+  const paginatedTeachers = useMemo(() => {
+    const start = page * rowsPerPage;
+    return filteredTeachers.slice(start, start + rowsPerPage);
+  }, [filteredTeachers, page, rowsPerPage]);
+
+  const handleChangePage = (_: unknown, newPage: number) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
 
   return (
     <Box className="teacher-page">
@@ -107,10 +122,9 @@ const Teacher: React.FC = () => {
         </Button>
       </Box>
 
-      {/* ✅ Search Input */}
       <Box sx={{ my: 2, display: "flex", justifyContent: "flex-start" }}>
         <TextField
-          label="Search by Name or Email"
+          label="Search By Teacher"
           variant="outlined"
           size="small"
           value={searchQuery}
@@ -120,7 +134,6 @@ const Teacher: React.FC = () => {
       </Box>
 
       <div>
-        {/* ✅ Proper loader */}
         {isLoading && (
           <Box display="flex" justifyContent="center" alignItems="center" height={200}>
             <CircularProgress />
@@ -130,44 +143,51 @@ const Teacher: React.FC = () => {
         {isError && <Typography color="error">Failed to load teachers</Typography>}
 
         {!isLoading && filteredTeachers.length > 0 && (
-          <TableContainer component={Paper}>
-            <Table sx={{ borderCollapse: "collapse" }}>
-              <TableHead>
-                <TableRow>
-                  <TableCell sx={{ border: "1px solid rgba(224, 224, 224, 1)" }}>ID</TableCell>
-                  <TableCell sx={{ border: "1px solid rgba(224, 224, 224, 1)" }}>Name</TableCell>
-                  <TableCell sx={{ border: "1px solid rgba(224, 224, 224, 1)" }}>Email</TableCell>
-                  <TableCell sx={{ border: "1px solid rgba(224, 224, 224, 1)" }}>Qualification</TableCell>
-                  <TableCell sx={{ border: "1px solid rgba(224, 224, 224, 1)" }}>Action</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {filteredTeachers.map((teacher: any) => (
-                  <TableRow key={teacher.teacher_id}>
-                    <TableCell sx={{ border: "1px solid rgba(224, 224, 224, 1)" }}>
-                      {teacher.teacher_id}
-                    </TableCell>
-                    <TableCell sx={{ border: "1px solid rgba(224, 224, 224, 1)" }}>{teacher.name}</TableCell>
-                    <TableCell sx={{ border: "1px solid rgba(224, 224, 224, 1)" }}>{teacher.email}</TableCell>
-                    <TableCell sx={{ border: "1px solid rgba(224, 224, 224, 1)" }}>
-                      {teacher.qualification || "-"}
-                    </TableCell>
-                    <TableCell sx={{ border: "1px solid rgba(224, 224, 224, 1)" }}>
-                      <IconButton
-                        onClick={() => navigate(`/teacher/view/${teacher.teacher_id}`)}
-                        color="primary"
-                      >
-                        <VisibilityIcon />
-                      </IconButton>
-                      <IconButton color="primary" onClick={() => handleEditClick(teacher)}>
-                        <EditIcon />
-                      </IconButton>
-                    </TableCell>
+          <>
+            <TableContainer component={Paper}>
+              <Table sx={{ borderCollapse: "collapse" }}>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>ID</TableCell>
+                    <TableCell>Name</TableCell>
+                    <TableCell>Email</TableCell>
+                    <TableCell>Qualification</TableCell>
+                    <TableCell>Action</TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+                </TableHead>
+                <TableBody>
+                  {paginatedTeachers.map((teacher: any) => (
+                    <TableRow key={teacher.teacher_id}>
+                      <TableCell>{teacher.teacher_id}</TableCell>
+                      <TableCell>{teacher.name}</TableCell>
+                      <TableCell>{teacher.email}</TableCell>
+                      <TableCell>{teacher.qualification || "-"}</TableCell>
+                      <TableCell>
+                        <IconButton
+                          onClick={() => navigate(`/teacher/view/${teacher.teacher_id}`)}
+                          color="primary"
+                        >
+                          <VisibilityIcon />
+                        </IconButton>
+                        <IconButton color="primary" onClick={() => handleEditClick(teacher)}>
+                          <EditIcon />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+            <TablePagination
+              component="div"
+              count={filteredTeachers.length}
+              page={page}
+              onPageChange={handleChangePage}
+              rowsPerPage={rowsPerPage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+              rowsPerPageOptions={[10, 25, 50, 100]}
+            />
+          </>
         )}
 
         {!isLoading && filteredTeachers.length === 0 && (
@@ -175,7 +195,6 @@ const Teacher: React.FC = () => {
         )}
       </div>
 
-      {/* Drawer for Create/Edit */}
       <Drawer
         anchor="right"
         open={drawerOpen}

@@ -1,9 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
-import { Card, CardContent, Grid, Box } from "@mui/material";
+import {
+  Card,
+  CardContent,
+  Divider,
+} from "@mui/material";
 import PeopleIcon from "@mui/icons-material/People";
 import SchoolIcon from "@mui/icons-material/School";
 import FamilyRestroomIcon from "@mui/icons-material/FamilyRestroom";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import CancelIcon from "@mui/icons-material/Cancel";
 import { useNavigate } from "react-router-dom";
 import "./Dashboard.css";
 import { useStudents } from "../student/studentApi/StudentApi";
@@ -15,24 +21,106 @@ const Dashboard: React.FC = () => {
   const navigate = useNavigate();
 
   const [counts, setCounts] = useState({
-    teachers: 0,
-    students: 0,
+    teachersTotal: 0,
+    teachersPresent: 0,
+    teachersAbsent: 0,
+    studentsTotal: 0,
+    studentsPresent: 0,
+    studentsAbsent: 0,
     parents: 0,
   });
 
-  // hooks fetching raw arrays from API
-  const { data: parentsData } = useParents(organizationId);
-  const { data: studentsData } = useStudents(organizationId);
-  const { data: teachersData } = useGetAllTeachers(organizationId);
+  const [classSectionWise, setClassSectionWise] = useState<
+    {
+      classId: number;
+      className: string;
+      section: string;
+      total: number;
+      present: number;
+      absent: number;
+    }[]
+  >([]);
 
-  // safely extract counts
+  const { data: students } = useStudents(organizationId);
+  const { data: parents } = useParents(organizationId);
+  const { data: teachers } = useGetAllTeachers(organizationId);
+
   useEffect(() => {
-    setCounts({
-      teachers: Array.isArray(teachersData) ? teachersData.length : 0,
-      students: Array.isArray(studentsData) ? studentsData.length : 0,
-      parents: Array.isArray(parentsData) ? parentsData.length : 0,
+    const defaults: {
+      classId: number;
+      className: string;
+      section: string;
+      total: number;
+      present: number;
+      absent: number;
+    }[] = [];
+
+    for (let classNo = 1; classNo <= 10; classNo++) {
+      ["A", "B", "C", "D"].forEach((section) => {
+        defaults.push({
+          classId: classNo,
+          className: `Class ${classNo}`,
+          section,
+          total: 0,
+          present: 0,
+          absent: 0,
+        });
+      });
+    }
+
+    const grouped: Record<string, any> = {};
+
+    if (Array.isArray(students)) {
+      const total = students.length;
+      const present = students.filter((s) => s.is_present).length;
+      const absent = total - present;
+
+      students.forEach((s: any) => {
+        const key = `${s.class_room.class_no}-${s.class_room.class_section}`;
+        if (!grouped[key]) {
+          grouped[key] = {
+            classId: s.class_room.class_no,
+            className: `Class ${s.class_room.class_no}`,
+            section: s.class_room.class_section,
+            total: 0,
+            present: 0,
+            absent: 0,
+          };
+        }
+        grouped[key].total += 1;
+        if (s.is_present) grouped[key].present += 1;
+        else grouped[key].absent += 1;
+      });
+
+      setCounts((prev) => ({
+        ...prev,
+        studentsTotal: total,
+        studentsPresent: present,
+        studentsAbsent: absent,
+        parents: Array.isArray(parents) ? parents.length : 0,
+      }));
+    }
+
+    if (Array.isArray(teachers)) {
+      const total = teachers.length;
+      const present = teachers.filter((t) => t.is_present).length;
+      const absent = total - present;
+
+      setCounts((prev) => ({
+        ...prev,
+        teachersTotal: total,
+        teachersPresent: present,
+        teachersAbsent: absent,
+      }));
+    }
+
+    const merged = defaults.map((def) => {
+      const key = `${def.classId}-${def.section}`;
+      return grouped[key] ? grouped[key] : def;
     });
-  }, [teachersData, studentsData, parentsData]);
+
+    setClassSectionWise(merged);
+  }, [students, teachers, parents]);
 
   const handleCardClick = (path: string) => {
     navigate(path);
@@ -40,73 +128,117 @@ const Dashboard: React.FC = () => {
 
   const cards = [
     {
-      title: "Teachers",
-      count: counts.teachers,
+      title: "Total Teachers",
+      count: counts.teachersTotal,
       icon: <SchoolIcon className="card-icon" />,
-      bgColor: "var(--primary-purple-500)",
+      bgColor: "#2A1989",
       path: "/teacher",
     },
     {
-      title: "Students",
-      count: counts.students,
+      title: "Present Teachers",
+      count: counts.teachersPresent,
+      icon: <CheckCircleIcon className="card-icon" />,
+      bgColor: "#13b11bff",
+      path: "/teacher",
+    },
+    {
+      title: "Absent Teachers",
+      count: counts.teachersAbsent,
+      icon: <CancelIcon className="card-icon" />,
+      bgColor: "#ff202f",
+      path: "/teacher",
+    },
+    {
+      title: "Total Students",
+      count: counts.studentsTotal,
       icon: <PeopleIcon className="card-icon" />,
-      bgColor: "var(--primary-purple-500)",
+      bgColor: "#2A1989",
+      path: "/student",
+    },
+    {
+      title: "Present Students",
+      count: counts.studentsPresent,
+      icon: <CheckCircleIcon className="card-icon" />,
+      bgColor: "#13b11bff",
+      path: "/student",
+    },
+    {
+      title: "Absent Students",
+      count: counts.studentsAbsent,
+      icon: <CancelIcon className="card-icon" />,
+      bgColor: "#ff202f",
       path: "/student",
     },
     {
       title: "Parents",
       count: counts.parents,
       icon: <FamilyRestroomIcon className="card-icon" />,
-      bgColor: "var(--primary-purple-500)",
+      bgColor: "#2A1989",
       path: "/parent",
     },
   ];
 
   return (
-    <Box className="home-container">
+    <div className="dashboard-container">
       <div className="greeting-text">Hello, {user?.email}</div>
       <div className="subtitle-text">
         Track and manage your teachers, students, and attendance.
       </div>
 
-      <div>Key Metrics</div>
-      <Grid container spacing={3} className="cards-grid">
+      <div className="section-title">Key Metrics</div>
+      <div className="cards-container">
         {cards.map((card) => (
-          <Grid item xs={12} sm={6} md={4} key={card.title}>
-            <Card
-              className="dashboard-card"
-              onClick={() => handleCardClick(card.path)}
-              sx={{
-                cursor: "pointer",
-                "&:hover": {
-                  transform: "scale(1.02)",
-                  transition: "transform 0.2s",
-                },
-              }}
-            >
-              <CardContent className="card-content">
-                <div className="card-main-content">
-                  <div className="card-text">
-                    <div
-                      className="card-icon-container"
-                      style={{ backgroundColor: card.bgColor }}
-                    >
-                      {card.icon}
-                    </div>
+          <div
+            key={card.title}
+            className="dashboard-card"
+            onClick={() => handleCardClick(card.path)}
+          >
+            <CardContent className="card-content">
+              <div className="card-main-content">
+                <div
+                  className="card-icon-container"
+                  style={{ backgroundColor: card.bgColor }}
+                >
+                  {card.icon}
+                </div>
+                <div>
+                  <div
+                    className="card-title"
+                    style={{ color: card.bgColor }} // 👈 title same color
+                  >
+                    {card.title}
                   </div>
-                  <div>
-                    <div className="card-title">{card.title}</div>
-                    <div className="card-value-container">
-                      <div className="card-value">{card.count}</div>
-                    </div>
+                  <div
+                    className="card-value"
+                    style={{ color: card.bgColor }} // 👈 value same color
+                  >
+                    {card.count}
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          </Grid>
+              </div>
+            </CardContent>
+          </div>
         ))}
-      </Grid>
-    </Box>
+      </div>
+
+      <Divider className="divider" />
+
+      <div className="section-title">Class & Section-wise Attendance</div>
+      <div className="class-section-container">
+        {classSectionWise.map((cls) => (
+          <div key={`${cls.classId}-${cls.section}`} className="class-card">
+            <CardContent>
+              <div className="class-title">
+                {cls.className} - {cls.section}
+              </div>
+              <div className="total-text">Total: <div className="class-section-value">{cls.total}</div></div>
+              <div className="present-text">Present: <div className="class-section-value">{cls.present}</div></div>
+              <div className="absent-text">Absent: <div className="class-section-value">{cls.absent}</div></div>
+            </CardContent>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 };
 

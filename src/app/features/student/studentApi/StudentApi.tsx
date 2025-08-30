@@ -14,14 +14,12 @@ export interface CreateStudentPayload {
 }
 
 export interface Student {
-  id: number;
+  admission_no: number; 
   name: string;
-  parent: number;
-  class_name: string;
-  section: string;
-  roll_no: string;
-  role: number;
-  organization: number;
+  parent: any; 
+  class_room: any;
+  role: any;
+  organization: any;
 }
 
 type ApiError = AxiosError<{ detail?: string }>;
@@ -55,6 +53,15 @@ const fetchStudentOrganization = async (): Promise<any> => {
 const fetchStudent = async (admission_no: number): Promise<Student> => {
   const response = await api.get(`/student/Students/retrieve/${admission_no}/`);
   return response.data;
+};
+
+const fetchStudentsBySection = async (class_room_id: number): Promise<Student[]> => {
+  const response = await api.get(`/student/Students/listbySection/${class_room_id}/`);
+  return response.data;
+};
+
+const deleteStudent = async (admission_no: number): Promise<void> => {
+  await api.delete(`/student/Students/delete/${admission_no}/`);
 };
 
 const updateStudent = async ({
@@ -130,7 +137,6 @@ export const useRegisterStudent = () => {
       return createStudent(payload);
     },
     onSuccess: () => {
-      // Invalidate student list so it refreshes after a new student is added
       queryClient.invalidateQueries({ queryKey: ["students"] });
     },
   });
@@ -153,5 +159,39 @@ export const useUpdateStudent = (organizationId?: number) => {
     refetchOnMount: true,
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
+  });
+};
+
+export const useStudentsBySection = (class_id?: number) => {
+  const { accessToken } = useAuth();
+
+  return useQuery<Student[], ApiError>({
+    queryKey: ["studentsBySection", class_id],
+    queryFn: () => {
+      if (accessToken) setAuthHeader(accessToken);
+      return fetchStudentsBySection(class_id!);
+    },
+    enabled: !!class_id,
+    keepPreviousData: true,
+    staleTime: 0,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
+  });
+};
+
+export const useDeleteStudent = (organizationId?: number) => {
+  const { accessToken } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation<void, ApiError, number>({
+    mutationFn: (admission_no) => {
+      if (accessToken) setAuthHeader(accessToken);
+      return deleteStudent(admission_no);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["students", organizationId] });
+      queryClient.invalidateQueries({ queryKey: ["studentsBySection"] });
+    },
   });
 };

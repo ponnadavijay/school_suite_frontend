@@ -15,7 +15,7 @@ import "./CreateStudent.css";
 interface CreateStudentProps {
     onClose: () => void;
     onStudentCreated: (student: any) => void;
-    studentData?: any; // for editing
+    studentData?: any;
 }
 
 const CreateStudent: React.FC<CreateStudentProps> = ({
@@ -39,13 +39,12 @@ const CreateStudent: React.FC<CreateStudentProps> = ({
 
     const [errors, setErrors] = useState<Record<string, string>>({});
 
-    // Prefill if editing
     useEffect(() => {
         if (studentData) {
             setFormData({
                 name: studentData.name || "",
-                parent: studentData.parent?.toString() || "",
-                class_room: studentData.class_room?.toString() || "",
+                parent: studentData.parent?.parent_id || "",
+                class_room: studentData.class_room?.class_id || "",
             });
         }
     }, [studentData]);
@@ -82,13 +81,12 @@ const CreateStudent: React.FC<CreateStudentProps> = ({
         const payload = {
             name: formData.name,
             parent: formData.parent ? Number(formData.parent) : null,
-            class_room: Number(formData.class_room),
+            class_room: formData.class_room ? Number(formData.class_room) : null,
             role: Number(user?.role),
             organization: Number(user?.organization),
         };
 
         if (studentData) {
-            // Update
             updateStudent(
                 { admission_no: studentData.admission_no, ...payload },
                 {
@@ -103,7 +101,6 @@ const CreateStudent: React.FC<CreateStudentProps> = ({
                 }
             );
         } else {
-            // Create
             registerStudent(payload, {
                 onSuccess: (data) => {
                     console.log("Student Registered:", data);
@@ -132,7 +129,6 @@ const CreateStudent: React.FC<CreateStudentProps> = ({
                 id="create-student-form"
                 className="create-student-form"
             >
-                {/* Name */}
                 <Box mb={2}>
                     <TextField
                         label="Full Name"
@@ -148,12 +144,10 @@ const CreateStudent: React.FC<CreateStudentProps> = ({
                     />
                 </Box>
 
-                {/* Parent Dropdown with Search */}
                 <Box mb={2}>
                     <Autocomplete
                         options={parents || []}
                         getOptionLabel={(option: any) => option.name || ""}
-                        // keep selected value visible
                         value={
                             parents?.find((p: any) => String(p.parent_id) === String(formData.parent)) ||
                             null
@@ -164,7 +158,7 @@ const CreateStudent: React.FC<CreateStudentProps> = ({
                         onChange={(_, newValue) => {
                             setFormData((prev) => ({
                                 ...prev,
-                                parent: newValue ? newValue.parent_id : null, // ✅ store parent_id as parent
+                                parent: newValue ? newValue.parent_id : null,
                             }));
                             if (errors.parent) {
                                 setErrors((prev) => ({ ...prev, parent: "" }));
@@ -186,8 +180,6 @@ const CreateStudent: React.FC<CreateStudentProps> = ({
                         )}
                     />
                 </Box>
-
-                {/* Class Room */}
                 <Box mb={2}>
                     <TextField
                         label="Class Room ID"

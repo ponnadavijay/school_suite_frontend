@@ -9,4 +9,18 @@
   margin-bottom: 20px;
 }
 
-/* Reuse the same table styles from Teacher.css */
+.student-filters {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 16px 0;
+}
+
+.student-filters .search-field {
+  width: 300px;
+}
+
+.student-filters .class-filter {
+  min-width: 200px;
+}

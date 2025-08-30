@@ -221,9 +221,9 @@ const CreateTeacher: React.FC<CreateTeacherProps> = ({
   return (
     <Box className="create-teacher-container">
       <Box className="create-teacher-header">
-        <Typography variant="h6">
+        <div>
           {isEditMode ? "Update Teacher" : "Create New Teacher"}
-        </Typography>
+        </div>
         <IconButton onClick={onClose}>
           <CloseIcon />
         </IconButton>
