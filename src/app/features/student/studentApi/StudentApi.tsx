@@ -4,7 +4,6 @@ import { useAuth } from "../../../context/AuthContext";
 
 const BASE_URL = "http://13.203.135.43";
 
-// ================== Types ==================
 export interface CreateStudentPayload {
   name: string;
   parent: number;
@@ -24,7 +23,6 @@ export interface Student {
 
 type ApiError = AxiosError<{ detail?: string }>;
 
-// ================== API Instance ==================
 const api = axios.create({
   baseURL: BASE_URL,
 });
@@ -32,8 +30,6 @@ const api = axios.create({
 const setAuthHeader = (token: string) => {
   api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 };
-
-// ================== API Functions ==================
 
 const createStudent = async (payload: CreateStudentPayload): Promise<Student> => {
   const response = await api.post(`/users/api/register/student`, payload);
@@ -72,7 +68,6 @@ const updateStudent = async ({
   return response.data;
 };
 
-// ================== React Query Hooks ==================
 export const useStudents = (organizationId?: number) => {
   const { accessToken } = useAuth();
 

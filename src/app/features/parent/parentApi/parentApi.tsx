@@ -4,7 +4,6 @@ import { useAuth } from "../../../context/AuthContext";
 
 const BASE_URL = "http://13.203.135.43";
 
-// ================== Types ==================
 export interface CreateParentPayload {
   name: string;
   email: string;
@@ -46,7 +45,6 @@ export interface Student {
 
 type ApiError = AxiosError<{ detail?: string }>;
 
-// ================== API Instance ==================
 const api = axios.create({
   baseURL: BASE_URL,
 });
@@ -55,7 +53,6 @@ const setAuthHeader = (token: string) => {
   api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 };
 
-// ================== API Functions ==================
 const createParent = async (payload: CreateParentPayload): Promise<Parent> => {
   const response = await api.post(`/users/api/register/parent`, payload);
   return response.data;
@@ -89,7 +86,6 @@ const updateParent = async ({
   return response.data;
 };
 
-// ================== React Query Hooks ==================
 export const useCreateParent = () => {
   const { accessToken } = useAuth();
 

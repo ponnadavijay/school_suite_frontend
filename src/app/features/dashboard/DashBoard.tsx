@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import {
-  Card,
   CardContent,
   Divider,
 } from "@mui/material";
@@ -17,7 +16,8 @@ import { useParents } from "../parent/parentApi/parentApi";
 import { useGetAllTeachers } from "../teacher/teacherApi/TeacherApi";
 
 const Dashboard: React.FC = () => {
-  const { user, organizationId } = useAuth();
+  const { user } = useAuth();
+  const organizationId = user?.organization?.org_id;
   const navigate = useNavigate();
 
   const [counts, setCounts] = useState({
@@ -170,7 +170,7 @@ const Dashboard: React.FC = () => {
       path: "/student",
     },
     {
-      title: "Parents",
+      title: "Total Parents",
       count: counts.parents,
       icon: <FamilyRestroomIcon className="card-icon" />,
       bgColor: "#2A1989",
@@ -180,7 +180,7 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="dashboard-container">
-      <div className="greeting-text">Hello, {user?.email}</div>
+      <div className="greeting-text">Hello, {user?.organization?.org_name}</div>
       <div className="subtitle-text">
         Track and manage your teachers, students, and attendance.
       </div>
@@ -204,13 +204,13 @@ const Dashboard: React.FC = () => {
                 <div>
                   <div
                     className="card-title"
-                    style={{ color: card.bgColor }} // 👈 title same color
+                    style={{ color: card.bgColor }}
                   >
                     {card.title}
                   </div>
                   <div
                     className="card-value"
-                    style={{ color: card.bgColor }} // 👈 value same color
+                    style={{ color: card.bgColor }}
                   >
                     {card.count}
                   </div>
@@ -223,17 +223,17 @@ const Dashboard: React.FC = () => {
 
       <Divider className="divider" />
 
-      <div className="section-title">Class & Section-wise Attendance</div>
+      <div className="section-sub-title">Class & Section-wise Attendance</div>
       <div className="class-section-container">
         {classSectionWise.map((cls) => (
           <div key={`${cls.classId}-${cls.section}`} className="class-card">
             <CardContent>
               <div className="class-title">
-                {cls.className} - {cls.section}
+                {cls.className} - {cls.section} Section
               </div>
-              <div className="total-text">Total: <div className="class-section-value">{cls.total}</div></div>
-              <div className="present-text">Present: <div className="class-section-value">{cls.present}</div></div>
-              <div className="absent-text">Absent: <div className="class-section-value">{cls.absent}</div></div>
+              <div className="total-text">Total Students: <div className="class-section-value">{cls.total}</div></div>
+              <div className="present-text">Present Students: <div className="class-section-value">{cls.present}</div></div>
+              <div className="absent-text">Absent Students: <div className="class-section-value">{cls.absent}</div></div>
             </CardContent>
           </div>
         ))}

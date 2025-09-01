@@ -2,8 +2,8 @@
     width: 400px;
     display: flex;
     flex-direction: column;
-     height: 100%;
-    max-height: 100vh; 
+    height: 100%;
+    max-height: 100vh;
 }
 
 .create-student-header {
@@ -59,7 +59,6 @@
     background: #555;
 }
 
-/* Responsive adjustments */
 @media (max-width: 600px) {
     .create-student-container {
         width: 100%;

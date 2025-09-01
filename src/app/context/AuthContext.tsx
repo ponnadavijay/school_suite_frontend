@@ -1,10 +1,21 @@
-// AuthContext.tsx
 import React, { createContext, useContext, useState, ReactNode } from "react";
+
+interface Role {
+  role_id: number;
+  role_name: string;
+}
+
+interface Organization {
+  org_id: number;
+  org_name: string;
+  org_estd_date: string;
+  founder: string;
+}
 
 interface User {
   email: string;
-  role: number;
-  organization: number;
+  role: Role;
+  organization: Organization;
 }
 
 interface AuthContextType {
@@ -30,21 +41,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   );
 
   const login = async (email: string, password: string) => {
-    // Replace with your actual login API call
-    const response = await fetch('/api/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+    const response = await fetch("/api/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
     });
 
-    if (!response.ok) {
-      throw new Error('Login failed');
-    }
+    if (!response.ok) throw new Error("Login failed");
 
     const data = await response.json();
-    setAuthData(data.user, data.accessToken, data.refreshToken);
+    setAuthData(data.user, data.access, data.refresh);
   };
 
   const logout = () => {
@@ -68,14 +74,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      accessToken, 
-      refreshToken, 
-      login, 
-      logout, 
-      setAuthData 
-    }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        accessToken,
+        refreshToken,
+        login,
+        logout,
+        setAuthData,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

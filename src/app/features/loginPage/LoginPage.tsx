@@ -117,17 +117,17 @@ const LoginPage: React.FC = () => {
               className="login-input"
             />
             <div className="login-button-container">
-            {signInError && <Alert severity="error">{signInError}</Alert>}
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              color="primary"
-              className="login-button"
-              disabled={loginMutation.isLoading}
-            >
-              {loginMutation.isLoading ? "Signing in..." : "Sign In"}
-            </Button>
+              {signInError && <Alert severity="error">{signInError}</Alert>}
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                color="primary"
+                className="login-button"
+                disabled={loginMutation.isLoading}
+              >
+                {loginMutation.isLoading ? "Signing in..." : "Sign In"}
+              </Button>
             </div>
             <Box className="login-links">
               <Link to="/register" className="registher-link">{"Don't have an account? Sign Up"}</Link>

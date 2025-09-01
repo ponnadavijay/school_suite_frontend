@@ -10,11 +10,27 @@ import CloseIcon from "@mui/icons-material/Close";
 import { useAuth } from "../../../context/AuthContext";
 import "./CreateParent.css";
 import { useCreateParent, useUpdateParent } from "../parentApi/parentApi";
+import { toast } from "react-toastify";
 
 interface CreateParentProps {
   onClose: () => void;
   onParentCreated: (parent: any) => void;
   parentData?: any;
+}
+
+interface FormData {
+  name: string;
+  email: string;
+  relation: string;
+  address_1: string;
+  address_2: string;
+  city: string;
+  state: string;
+  pincode: string;
+  mobile_no: string;
+  whatsapp_no: string;
+  organization: string;
+  role: string;
 }
 
 const relationOptions = [
@@ -34,7 +50,7 @@ const CreateParent: React.FC<CreateParentProps> = ({
   const { mutate: createParent, isPending: creating } = useCreateParent();
   const { mutate: updateParent, isPending: updating } = useUpdateParent();
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     name: "",
     email: "",
     relation: "",
@@ -45,31 +61,23 @@ const CreateParent: React.FC<CreateParentProps> = ({
     pincode: "",
     mobile_no: "",
     whatsapp_no: "",
-    organization: "",
+    organization: user?.organization?.org_id?.toString() || "",
     role: "",
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Prefill if editing
   useEffect(() => {
     if (parentData) {
-      setFormData({
-        ...formData,
-        ...parentData,
-        organization: parentData.organization?.toString() || user?.organization?.toString() || "",
-        role: parentData.role?.toString() || "",
-        pincode: parentData.pincode?.toString() || "",
-      });
-    } else if (user?.organization) {
       setFormData((prev) => ({
         ...prev,
-        organization: user.organization.toString(),
-        role: "",
+        ...parentData,
+        organization: parentData.organization?.toString() || prev.organization,
+        role: parentData.role?.toString() || prev.role,
+        pincode: parentData.pincode?.toString() || prev.pincode,
       }));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [parentData, user]);
+  }, [parentData]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -92,7 +100,7 @@ const CreateParent: React.FC<CreateParentProps> = ({
     ];
 
     requiredFields.forEach((field) => {
-      if (!formData[field as keyof typeof formData]) {
+      if (!formData[field as keyof FormData]) {
         newErrors[field] = "This field is required";
       }
     });
@@ -121,26 +129,38 @@ const CreateParent: React.FC<CreateParentProps> = ({
     const payload = {
       ...formData,
       organization: Number(formData.organization),
-      role: Number(formData.role),
+      role: formData.role ? Number(formData.role) : null,
       pincode: Number(formData.pincode),
     };
 
     if (parentData) {
-      // update
       updateParent(
         { parent_id: parentData.id, ...payload },
         {
           onSuccess: (data) => {
             onParentCreated(data);
+            toast.success("Parent updated successfully 🎉");
+            onClose();
+          },
+          onError: (error: any) => {
+            toast.error(
+              error?.response?.data?.message || "Failed to update parent ❌"
+            );
             onClose();
           },
         }
       );
     } else {
-      // create
       createParent(payload, {
         onSuccess: (data) => {
           onParentCreated(data);
+          toast.success("Parent created successfully 🎉");
+          onClose();
+        },
+        onError: (error: any) => {
+          toast.error(
+            error?.response?.data?.message || "Failed to create parent ❌"
+          );
           onClose();
         },
       });
@@ -148,6 +168,7 @@ const CreateParent: React.FC<CreateParentProps> = ({
   };
 
   const isEdit = !!parentData;
+  const isSubmitting = creating || updating;
 
   return (
     <Box className="create-parent-container">
@@ -183,10 +204,10 @@ const CreateParent: React.FC<CreateParentProps> = ({
             maxLength: 200,
             required: false,
           },
+          { label: "Pincode", name: "pincode", type: "text", maxLength: 6 },
           { label: "City", name: "city", type: "text", maxLength: 200 },
           { label: "State", name: "state", type: "text", maxLength: 200 },
-          { label: "Pincode", name: "pincode", type: "text", maxLength: 6 },
-          { label: "Role", name: "role", type: "text" },
+          { label: "Role", name: "role", type: "text", required: false },
         ].map((field) => (
           <Box key={field.name} mb={2}>
             {field.type === "select" ? (
@@ -194,12 +215,13 @@ const CreateParent: React.FC<CreateParentProps> = ({
                 select
                 label={field.label}
                 name={field.name}
-                value={formData[field.name as keyof typeof formData] || ""}
+                value={formData[field.name as keyof FormData] || ""}
                 onChange={handleChange}
                 error={!!errors[field.name]}
                 helperText={errors[field.name] || ""}
                 fullWidth
                 required
+                disabled={isSubmitting}
               >
                 {field.options?.map((option) => (
                   <MenuItem key={option.value} value={option.value}>
@@ -212,13 +234,14 @@ const CreateParent: React.FC<CreateParentProps> = ({
                 label={field.label}
                 name={field.name}
                 type={field.type}
-                value={formData[field.name as keyof typeof formData] || ""}
+                value={formData[field.name as keyof FormData] || ""}
                 onChange={handleChange}
                 error={!!errors[field.name]}
                 helperText={errors[field.name] || ""}
                 required={field.required !== false}
                 inputProps={{ maxLength: field.maxLength }}
                 fullWidth
+                disabled={isSubmitting}
               />
             )}
           </Box>
@@ -226,23 +249,27 @@ const CreateParent: React.FC<CreateParentProps> = ({
       </Box>
 
       <Box className="create-parent-footer">
-        <Button variant="outlined" onClick={onClose} disabled={creating || updating}>
+        <Button
+          variant="outlined"
+          onClick={onClose}
+          disabled={isSubmitting}
+        >
           Cancel
         </Button>
         <Button
           type="submit"
           variant="contained"
           color="primary"
-          disabled={creating || updating}
+          disabled={isSubmitting}
           form="create-parent-form"
         >
-          {creating || updating
+          {isSubmitting
             ? isEdit
               ? "Updating..."
               : "Creating..."
             : isEdit
-            ? "Update Parent"
-            : "Create Parent"}
+              ? "Update Parent"
+              : "Create Parent"}
         </Button>
       </Box>
     </Box>

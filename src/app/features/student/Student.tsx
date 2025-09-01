@@ -37,7 +37,7 @@ const Student: React.FC = () => {
   const [selectedClassId, setSelectedClassId] = useState<number | "">("");
 
   const { user } = useAuth();
-  const organizationId = user?.organization;
+  const organizationId = user?.organization?.org_id;
 
   const {
     data: students,
@@ -74,20 +74,15 @@ const Student: React.FC = () => {
     }
   };
 
-  // 🔹 Filter function
   const filteredStudents = useMemo(() => {
     if (!students) return [];
 
     let list = [...students];
-
-    // Filter by Class ID if selected
     if (selectedClassId !== "") {
       list = list.filter(
         (student) => student.class_room?.class_id === selectedClassId
       );
     }
-
-    // Search filter
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
       list = list.filter(
@@ -98,17 +93,14 @@ const Student: React.FC = () => {
           student.parent?.mobile_no?.includes(q)
       );
     }
-
     return list;
   }, [students, searchQuery, selectedClassId]);
 
-  // 🔹 Pagination
   const paginatedStudents = useMemo(() => {
     const start = page * rowsPerPage;
     return filteredStudents.slice(start, start + rowsPerPage);
   }, [filteredStudents, page, rowsPerPage]);
 
-  // 🔹 Unique Class IDs for Dropdown
   const classOptions = useMemo(() => {
     if (!students) return [];
     const uniqueClasses = new Map();

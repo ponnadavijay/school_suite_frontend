@@ -35,7 +35,7 @@ const Teacher: React.FC = () => {
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const { user } = useAuth();
-  const organizationId = user?.organization;
+  const organizationId = user?.organization?.org_id;
   const navigate = useNavigate();
 
   const createTeacherMutation = useCreateTeacher();

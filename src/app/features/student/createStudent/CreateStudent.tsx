@@ -11,6 +11,7 @@ import { useAuth } from "../../../context/AuthContext";
 import { useRegisterStudent, useUpdateStudent } from "../studentApi/StudentApi";
 import { useParents } from "../../parent/parentApi/parentApi";
 import "./CreateStudent.css";
+import { toast } from "react-toastify";
 
 interface CreateStudentProps {
     onClose: () => void;
@@ -24,12 +25,13 @@ const CreateStudent: React.FC<CreateStudentProps> = ({
     studentData,
 }) => {
     const { user } = useAuth();
+    const organizationId = user?.organization?.org_id;
     const { mutate: registerStudent, isPending: isCreating } =
         useRegisterStudent();
     const { mutate: updateStudent, isPending: isUpdating } =
-        useUpdateStudent(user?.organization);
+        useUpdateStudent(organizationId);
 
-    const { data: parents } = useParents(user?.organization);
+    const { data: parents } = useParents(organizationId);
 
     const [formData, setFormData] = useState({
         name: "",
@@ -91,24 +93,28 @@ const CreateStudent: React.FC<CreateStudentProps> = ({
                 { admission_no: studentData.admission_no, ...payload },
                 {
                     onSuccess: (data) => {
-                        console.log("Student Updated:", data);
+                        toast.success("Student updated successfully ✅");
                         onStudentCreated(data);
                         onClose();
                     },
-                    onError: (err) => {
-                        console.error("Failed to update student:", err);
+                    onError: (err: any) => {
+                        toast.error(
+                            err?.response?.data?.message || "Failed to update student ❌"
+                        );
                     },
                 }
             );
         } else {
             registerStudent(payload, {
                 onSuccess: (data) => {
-                    console.log("Student Registered:", data);
+                    toast.success("Student registered successfully ✅");
                     onStudentCreated(data);
                     onClose();
                 },
-                onError: (err) => {
-                    console.error("Failed to register student:", err);
+                onError: (err: any) => {
+                    toast.error(
+                        err?.response?.data?.message || "Failed to register student ❌"
+                    );
                 },
             });
         }

@@ -2,9 +2,9 @@ import { createTheme } from "@mui/material/styles";
 
 const theme = createTheme({
   typography: {
-    fontFamily: "Inter",
+    fontFamily: "Roboto",
     h1: {
-      fontFamily: "Inter",
+      fontFamily: "Roboto",
       fontWeight: 700,
       fontSize: "1.5rem",
       lineHeight: "1.8rem",
@@ -55,7 +55,7 @@ const theme = createTheme({
       },
       styleOverrides: {
         root: {
-          fontFamily: "Inter",
+          fontFamily: "Roboto",
           borderRadius: "0.5rem",
           textTransform: "none",
           padding: "0 0.9375rem",
@@ -65,10 +65,10 @@ const theme = createTheme({
           border: "1px solid currentColor",
         },
         contained: {
-          backgroundColor: "#2A1989", // Updated purple color
+          backgroundColor: "#2A1989",
           color: "#fff",
           "&:hover": {
-            backgroundColor: "#2A1989", // Updated purple color
+            backgroundColor: "#2A1989",
           },
         },
         containedSecondary: {
@@ -86,7 +86,7 @@ const theme = createTheme({
           },
         },
         outlined: {
-          fontFamily: "Inter",
+          fontFamily: "Roboto",
           borderRadius: "0.5rem",
           borderColor: "#2A1989",
           color: "#2A1989",
@@ -104,7 +104,7 @@ const theme = createTheme({
     MuiDialog: {
       styleOverrides: {
         paper: {
-          fontFamily: "'Inter'",
+          fontFamily: "'Roboto'",
           borderRadius: "0.5rem",
         },
       },
@@ -112,7 +112,7 @@ const theme = createTheme({
     MuiDialogTitle: {
       styleOverrides: {
         root: {
-          fontFamily: "Inter",
+          fontFamily: "Roboto",
           fontSize: "1.25rem",
           fontWeight: 700,
           lineHeight: "1.5rem",
@@ -127,7 +127,7 @@ const theme = createTheme({
     MuiDialogContent: {
       styleOverrides: {
         root: {
-          fontFamily: "Inter",
+          fontFamily: "Roboto",
           padding: "2rem",
         },
       },
@@ -135,7 +135,7 @@ const theme = createTheme({
     MuiDialogContentText: {
       styleOverrides: {
         root: {
-          fontFamily: "Inter",
+          fontFamily: "Roboto",
           fontSize: "0.875rem",
           fontWeight: 600,
           color: "#6B7280",
@@ -146,7 +146,7 @@ const theme = createTheme({
     MuiDialogActions: {
       styleOverrides: {
         root: {
-          fontFamily: "Inter",
+          fontFamily: "Roboto",
           display: "flex",
           justifyContent: "space-between",
           gap: "0.5rem",
@@ -157,7 +157,7 @@ const theme = createTheme({
     MuiTableRow: {
       styleOverrides: {
         root: {
-          fontFamily: "Inter",
+          fontFamily: "Roboto",
           "&:nth-of-type(odd)": {
             backgroundColor: "#ffffff",
           },
@@ -180,7 +180,7 @@ const theme = createTheme({
     MuiTableCell: {
       styleOverrides: {
         root: {
-          fontFamily: "Inter",
+          fontFamily: "Roboto",
           padding: "1rem",
           color: "#333",
           height: "100%",
@@ -206,7 +206,7 @@ const theme = createTheme({
           maxWidth: "400px",
           fontWeight: "400",
           lineHeight: "1.125rem",
-          fontFamily: "Inter",
+          fontFamily: "Roboto",
           border: "1rem",
           "&:hover .MuiOutlinedInput-notchedOutline": {
             borderColor: "#000000",
@@ -218,14 +218,13 @@ const theme = createTheme({
     MuiOutlinedInput: {
       styleOverrides: {
         root: {
-          fontFamily: "Inter",
+          fontFamily: "Roboto",
           "&:hover .MuiOutlinedInput-notchedOutline": {
-            borderColor: "#2A1989", // Updated purple color
+            borderColor: "#2A1989",
             borderWidth: "2px",
           },
           "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-            borderColor: "#2A1989", // Updated purple color
-            borderWidth: "2px",
+            borderColor: "#2A1989",
           },
           backgroundColor: "#FFFFFF",
         },
@@ -243,23 +242,23 @@ const theme = createTheme({
     MuiListItem: {
       styleOverrides: {
         root: {
-          fontFamily: "Inter",
+          fontFamily: "Roboto",
           fontWeight: "400",
           maxWidth: "400px",
           padding: "0.5rem",
           height: "2.5rem",
           backgroundColor: "#FFFFFF",
           "&:hover": {
-            color: "#2A1989", // Updated purple color
+            color: "#2A1989",
             backgroundColor: "#f1f1f1",
             borderRadius: "0.35rem",
           },
           "&.Mui-selected": {
             backgroundColor: "#E8EAF6",
             borderRadius: "0.35rem",
-            color: "#2A1989", // Updated purple color
+            color: "#2A1989",
             "& .MuiSvgIcon-root": {
-              color: "#2A1989", // Updated purple color
+              color: "#2A1989",
             },
           },
         },
@@ -280,10 +279,10 @@ const theme = createTheme({
       styleOverrides: {
         primary: {
           "&:hover": {
-            color: "#2A1989", // Updated purple color
+            color: "#2A1989",
           },
           "&.Mui-selected": {
-            color: "#2A1989", // Updated purple color
+            color: "#2A1989",
             fontWeight: "500",
           },
         },
@@ -293,7 +292,7 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           fontSize: "1.5rem",
-          color: "rgba(0, 0, 0, 0.54)",
+          // color: "rgba(0, 0, 0, 0.54)",
           transition: "transform 0.3s",
           "&:hover": {
             transform: "scale(1.1)",
@@ -304,7 +303,7 @@ const theme = createTheme({
     MuiTypography: {
       styleOverrides: {
         root: {
-          fontFamily: "Inter",
+          fontFamily: "Roboto",
           fontSize: "1rem",
           margin: 0,
           padding: 0,

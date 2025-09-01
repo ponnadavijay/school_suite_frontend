@@ -31,7 +31,8 @@ const Parent: React.FC = () => {
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const { user } = useAuth();
-  const { data: parents = [], isLoading, isError } = useParents(user?.organization);
+  const organizationId = user?.organization?.org_id;
+  const { data: parents = [], isLoading, isError } = useParents(organizationId);
 
   const handleOpenDrawer = () => {
     setDrawerOpen(true);
