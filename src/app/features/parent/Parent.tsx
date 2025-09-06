@@ -21,7 +21,8 @@ import EditIcon from "@mui/icons-material/Edit";
 import { useAuth } from "../../context/AuthContext";
 import CreateParent from "./createParent/CreateParent";
 import "./Parent.css";
-import { useParents } from "./parentApi/parentApi";
+import { useParents, useCreateParent, useUpdateParent } from "./parentApi/parentApi";
+import { toast } from "react-toastify";
 
 const Parent: React.FC = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -32,7 +33,10 @@ const Parent: React.FC = () => {
 
   const { user } = useAuth();
   const organizationId = user?.organization?.org_id;
-  const { data: parents = [], isLoading, isError } = useParents(organizationId);
+
+  const { data: parents = [], isLoading, isError, refetch } = useParents(organizationId);
+  const createParentMutation = useCreateParent();
+  const updateParentMutation = useUpdateParent();
 
   const handleOpenDrawer = () => {
     setDrawerOpen(true);
@@ -49,6 +53,32 @@ const Parent: React.FC = () => {
     setDrawerOpen(true);
   };
 
+  const handleSubmit = async (formData: any) => {
+    const payload = {
+      ...formData,
+      organization: Number(formData.organization),
+      role: formData.role ? Number(formData.role) : null,
+      pincode: Number(formData.pincode),
+    };
+
+    try {
+      if (editParent) {
+        await updateParentMutation.mutateAsync({
+          parent_id: editParent.id,
+          ...payload,
+        });
+        toast.success("Parent updated successfully 🎉");
+      } else {
+        await createParentMutation.mutateAsync(payload);
+        toast.success("Parent created successfully 🎉");
+      }
+      await refetch();
+      handleCloseDrawer();
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || "Something went wrong ❌");
+    }
+  };
+
   const filteredParents = useMemo(() => {
     if (!searchQuery) return parents;
     return parents.filter(
@@ -59,10 +89,7 @@ const Parent: React.FC = () => {
     );
   }, [parents, searchQuery]);
 
-  const handleChangePage = (_event: unknown, newPage: number) => {
-    setPage(newPage);
-  };
-
+  const handleChangePage = (_event: unknown, newPage: number) => setPage(newPage);
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
@@ -77,12 +104,7 @@ const Parent: React.FC = () => {
     <Box className="parent-page">
       <div className="parent-header">
         <div className="list-header-title">Parents</div>
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={<AddIcon />}
-          onClick={handleOpenDrawer}
-        >
+        <Button variant="contained" color="primary" startIcon={<AddIcon />} onClick={handleOpenDrawer}>
           Register Parent
         </Button>
       </div>
@@ -104,42 +126,34 @@ const Parent: React.FC = () => {
             <CircularProgress />
           </Box>
         ) : isError ? (
-          <Typography color="error" align="center">
-            Failed to load parent data.
-          </Typography>
+          <Box display="flex" justifyContent="center" alignItems="center" height={200}>
+            <Typography variant="h6">
+              Session expired, please relogin!
+            </Typography>
+          </Box>
         ) : filteredParents.length > 0 ? (
           <>
             <TableContainer component={Paper}>
-              <Table sx={{ borderCollapse: "collapse" }}>
+              <Table>
                 <TableHead>
                   <TableRow>
-                    <TableCell sx={{ border: "1px solid rgba(224,224,224,1)" }}>ID</TableCell>
-                    <TableCell sx={{ border: "1px solid rgba(224,224,224,1)" }}>Name</TableCell>
-                    <TableCell sx={{ border: "1px solid rgba(224,224,224,1)" }}>Email</TableCell>
-                    <TableCell sx={{ border: "1px solid rgba(224,224,224,1)" }}>Relation</TableCell>
-                    <TableCell sx={{ border: "1px solid rgba(224,224,224,1)" }}>Mobile</TableCell>
-                    <TableCell sx={{ border: "1px solid rgba(224,224,224,1)" }}>Action</TableCell>
+                    <TableCell>ID</TableCell>
+                    <TableCell>Name</TableCell>
+                    <TableCell>Email</TableCell>
+                    <TableCell>Relation</TableCell>
+                    <TableCell>Mobile</TableCell>
+                    <TableCell>Action</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {paginatedParents.map((parent: any) => (
                     <TableRow key={parent.parent_id}>
-                      <TableCell sx={{ border: "1px solid rgba(224,224,224,1)" }}>
-                        {parent.parent_id}
-                      </TableCell>
-                      <TableCell sx={{ border: "1px solid rgba(224,224,224,1)" }}>
-                        {parent.name}
-                      </TableCell>
-                      <TableCell sx={{ border: "1px solid rgba(224,224,224,1)" }}>
-                        {parent.email}
-                      </TableCell>
-                      <TableCell sx={{ border: "1px solid rgba(224,224,224,1)" }}>
-                        {parent.relation}
-                      </TableCell>
-                      <TableCell sx={{ border: "1px solid rgba(224,224,224,1)" }}>
-                        {parent.mobile_no}
-                      </TableCell>
-                      <TableCell sx={{ border: "1px solid rgba(224,224,224,1)" }}>
+                      <TableCell>{parent.parent_id}</TableCell>
+                      <TableCell>{parent.name}</TableCell>
+                      <TableCell>{parent.email}</TableCell>
+                      <TableCell>{parent.relation}</TableCell>
+                      <TableCell>{parent.mobile_no}</TableCell>
+                      <TableCell>
                         <IconButton color="primary" onClick={() => handleEditClick(parent)}>
                           <EditIcon />
                         </IconButton>
@@ -161,22 +175,18 @@ const Parent: React.FC = () => {
             />
           </>
         ) : (
-          <Typography variant="body1" color="textSecondary" sx={{ textAlign: "center", mt: 4 }}>
+          <Typography align="center" sx={{ mt: 4 }} color="textSecondary">
             No parent data available.
           </Typography>
         )}
       </div>
 
-      <Drawer
-        anchor="right"
-        open={drawerOpen}
-        onClose={handleCloseDrawer}
-        PaperProps={{ sx: { width: "400px" } }}
-      >
+      <Drawer anchor="right" open={drawerOpen} onClose={handleCloseDrawer} PaperProps={{ sx: { width: "400px" } }}>
         <CreateParent
           onClose={handleCloseDrawer}
-          onParentCreated={() => window.location.reload()}
+          onSubmit={handleSubmit}
           parentData={editParent}
+          isLoading={createParentMutation.isPending || updateParentMutation.isPending}
         />
       </Drawer>
     </Box>

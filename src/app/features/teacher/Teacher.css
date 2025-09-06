@@ -1,5 +1,8 @@
-.teacher-page {
-  overflow-y: auto;
+.teacher-header-container {
+  top: -16px;
+  position: sticky;
+  z-index: 1000;
+  background-color: white;
 }
 
 .teacher-header {
@@ -9,7 +12,6 @@
   justify-content: space-between;
   align-items: center;
   border-radius: 8px;
-  /* margin-bottom: 20px; */
 }
 
 .list-header-title {
@@ -17,4 +19,4 @@
   font-weight: var(--bold-font-weight);
   color: var(--primary-purple-600);
   font-family: var(--font-family);
-} 
+}

@@ -1,13 +1,30 @@
 .login-container {
+    position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
     width: 100%;
     padding: 20px;
-    background-color: #f9f9f9;
     box-sizing: border-box;
+    background-image: url("../../../assets/class_room.jpeg");
+    background-size: cover;
+    background-position: center;
 }
+
+.login-container::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(3px);
+}
+
+.login-container>* {
+    position: relative;
+}
+
 
 .login {
     text-align: center;

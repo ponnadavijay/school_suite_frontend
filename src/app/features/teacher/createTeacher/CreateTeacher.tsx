@@ -1,29 +1,24 @@
 import React, { useState, useEffect } from "react";
-import { Box, Button, TextField, IconButton, Alert } from "@mui/material";
+import { Box, Button, TextField, IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { useAuth } from "../../../context/AuthContext";
 import "./CreateTeacher.css";
-import { useCreateTeacher, useUpdateTeacher } from "../teacherApi/TeacherApi";
-import { toast } from "react-toastify";
 
 interface CreateTeacherProps {
   onClose: () => void;
-  onTeacherCreated: (teacher: any) => void;
+  onSubmit: (payload: any) => void;
   teacherData?: any;
+  isLoading?: boolean;
 }
 
 const CreateTeacher: React.FC<CreateTeacherProps> = ({
   onClose,
-  onTeacherCreated,
+  onSubmit,
   teacherData,
+  isLoading,
 }) => {
   const { user } = useAuth();
-  const { mutate: createTeacher, isPending: isCreating, error: createError } = useCreateTeacher();
-  const { mutate: updateTeacher, isPending: isUpdating, error: updateError } = useUpdateTeacher();
-
   const isEditMode = !!teacherData;
-  const error = isEditMode ? updateError : createError;
-
   const [formData, setFormData] = useState({
     name: "",
     qualification: "",
@@ -38,43 +33,7 @@ const CreateTeacher: React.FC<CreateTeacherProps> = ({
     role: "",
     organization: "",
   });
-
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [apiError, setApiError] = useState<string>("");
-
-  useEffect(() => {
-    if (apiError) {
-      setApiError("");
-    }
-  }, [formData]);
-
-  useEffect(() => {
-    if (error) {
-      if (error instanceof Error) {
-        try {
-          const errorData = JSON.parse(error.message);
-          if (errorData.data) {
-            const parsedData =
-              typeof errorData.data === "string"
-                ? JSON.parse(errorData.data.replace(/'/g, '"'))
-                : errorData.data;
-
-            if (parsedData.email) {
-              setErrors((prev) => ({ ...prev, email: parsedData.email[0] }));
-            } else {
-              setApiError("An error occurred. Please try again.");
-            }
-          } else {
-            setApiError(errorData.message || "An error occurred. Please try again.");
-          }
-        } catch (e) {
-          setApiError("An error occurred. Please try again.");
-        }
-      } else {
-        setApiError("An error occurred. Please try again.");
-      }
-    }
-  }, [error]);
 
   useEffect(() => {
     if (isEditMode && teacherData) {
@@ -153,49 +112,18 @@ const CreateTeacher: React.FC<CreateTeacherProps> = ({
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setApiError("");
-
     if (!validate()) return;
 
     const payload = {
       ...formData,
       organization: user?.organization?.org_id ?? 0,
-      role: Number(formData.role || user?.role?.role_id),
+      role: user?.role?.role_id ?? 0,
       pincode: parseInt(formData.pincode),
     };
 
-    if (isEditMode) {
-      updateTeacher(
-        { teacher_id: teacherData.teacher_id, ...payload },
-        {
-          onSuccess: (data) => {
-            toast.success("Teacher updated successfully ✅");
-            onTeacherCreated(data);
-            onClose();
-          },
-          onError: (err: any) => {
-            toast.error(
-              err?.response?.data?.message || "Failed to update teacher ❌"
-            );
-          },
-        }
-      );
-    } else {
-      createTeacher(payload, {
-        onSuccess: (data) => {
-          toast.success("Teacher created successfully ✅");
-          onTeacherCreated(data);
-          onClose();
-        },
-        onError: (err: any) => {
-          toast.error(
-            err?.response?.data?.message || "Failed to create teacher ❌"
-          );
-        },
-      });
-    }
+    onSubmit(payload);
   };
 
   const formFields = [
@@ -206,7 +134,6 @@ const CreateTeacher: React.FC<CreateTeacherProps> = ({
     { label: "WhatsApp Number", name: "whatsapp_no", type: "text", maxLength: 10 },
     { label: "Address Line 1", name: "address_1", type: "text" },
     { label: "Address Line 2", name: "address_2", type: "text" },
-    ...(!isEditMode ? [{ label: "Role (ID)", name: "role", type: "text" }] : []),
     { label: "City", name: "city", type: "text" },
     { label: "State", name: "state", type: "text" },
     { label: "Pincode", name: "pincode", type: "text", maxLength: 6 },
@@ -223,15 +150,9 @@ const CreateTeacher: React.FC<CreateTeacherProps> = ({
         </IconButton>
       </Box>
 
-      {apiError && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {apiError}
-        </Alert>
-      )}
-
       <Box
         component="form"
-        onSubmit={handleSubmit}
+        onSubmit={handleFormSubmit}
         id="create-teacher-form"
         className="create-teacher-form"
       >
@@ -245,9 +166,9 @@ const CreateTeacher: React.FC<CreateTeacherProps> = ({
               onChange={handleChange}
               error={!!errors[field.name]}
               helperText={errors[field.name] || ""}
-              required={!isEditMode || field.name !== "role"}
               inputProps={field.maxLength ? { maxLength: field.maxLength } : undefined}
               fullWidth
+              required
             />
           </Box>
         ))}
@@ -256,7 +177,7 @@ const CreateTeacher: React.FC<CreateTeacherProps> = ({
         <Button
           variant="outlined"
           onClick={onClose}
-          disabled={isCreating || isUpdating}
+          isabled={isLoading}
         >
           Cancel
         </Button>
@@ -265,9 +186,9 @@ const CreateTeacher: React.FC<CreateTeacherProps> = ({
           variant="contained"
           color="primary"
           form="create-teacher-form"
-          disabled={isCreating || isUpdating}
+          disabled={isLoading}
         >
-          {isCreating || isUpdating
+          {isLoading
             ? isEditMode
               ? "Updating..."
               : "Creating..."

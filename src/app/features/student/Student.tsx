@@ -25,8 +25,9 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useAuth } from "../../context/AuthContext";
 import CreateStudent from "./createStudent/CreateStudent";
-import { useDeleteStudent, useStudents } from "./studentApi/StudentApi";
+import { useDeleteStudent, useStudents, useRegisterStudent, useUpdateStudent } from "./studentApi/StudentApi";
 import "./Student.css";
+import { toast } from "react-toastify";
 
 const Student: React.FC = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -38,14 +39,11 @@ const Student: React.FC = () => {
 
   const { user } = useAuth();
   const organizationId = user?.organization?.org_id;
+  const roleId = user?.role?.role_id
 
-  const {
-    data: students,
-    isLoading,
-    isError,
-    refetch,
-  } = useStudents(organizationId);
-
+  const { data: students, isLoading, isError, refetch } = useStudents(organizationId);
+  const { mutateAsync: registerStudent, isPending: isRegistering } = useRegisterStudent();
+  const { mutateAsync: updateStudent, isPending: isUpdating } = useUpdateStudent(organizationId);
   const { mutate: deleteStudent } = useDeleteStudent(organizationId);
 
   const handleOpenDrawer = () => {
@@ -68,20 +66,46 @@ const Student: React.FC = () => {
   const handleDeleteClick = (admission_no: number) => {
     if (window.confirm("Are you sure you want to delete this student?")) {
       deleteStudent(admission_no, {
-        onSuccess: () => refetch(),
-        onError: (err) => console.error("Delete failed:", err),
+        onSuccess: () => {
+          toast.success("Student deleted successfully ✅");
+          refetch();
+        },
+        onError: (err: any) => {
+          toast.error(err?.response?.data?.message || "Failed to delete ❌");
+        },
       });
+    }
+  };
+
+  const handleSubmit = async (formData: any) => {
+    const payload = {
+      name: formData.name,
+      parent: formData.parent ? Number(formData.parent) : null,
+      class_room: formData.class_room ? Number(formData.class_room) : null,
+      organization: organizationId ? Number(organizationId) : null,
+      role: user?.role?.role_id ? Number(user.role.role_id) : null,
+    };
+
+    try {
+      if (editStudent) {
+        await updateStudent({ admission_no: editStudent.admission_no, ...payload });
+        toast.success("Student updated successfully ✅");
+      } else {
+        await registerStudent(payload);
+        toast.success("Student registered successfully ✅");
+      }
+      refetch();
+      handleCloseDrawer();
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || "Something went wrong ❌");
     }
   };
 
   const filteredStudents = useMemo(() => {
     if (!students) return [];
-
     let list = [...students];
     if (selectedClassId !== "") {
-      list = list.filter(
-        (student) => student.class_room?.class_id === selectedClassId
-      );
+      list = list.filter((student) => student.class_room?.class_id === selectedClassId);
     }
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
@@ -165,9 +189,11 @@ const Student: React.FC = () => {
             <CircularProgress />
           </Box>
         ) : isError ? (
-          <Typography color="error" sx={{ textAlign: "center", mt: 4 }}>
-            Error fetching student data.
-          </Typography>
+          <Box display="flex" justifyContent="center" alignItems="center" height={200}>
+            <Typography variant="h6">
+              Session expired, please relogin!
+            </Typography>
+          </Box>
         ) : filteredStudents.length ? (
           <>
             <TableContainer component={Paper}>
@@ -175,11 +201,11 @@ const Student: React.FC = () => {
                 <TableHead>
                   <TableRow>
                     <TableCell>Admission No</TableCell>
-                    <TableCell>Full Name</TableCell>
+                    <TableCell>Student Name</TableCell>
+                    <TableCell>Class Room & Section</TableCell>
                     <TableCell>Parent Name</TableCell>
-                    <TableCell>Mobile Number</TableCell>
-                    <TableCell>Class Room</TableCell>
-                    <TableCell>Action</TableCell>
+                    <TableCell>Parent Mobile Number</TableCell>
+                    <TableCell>Actions</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -188,15 +214,15 @@ const Student: React.FC = () => {
                       <TableCell>{student.admission_no}</TableCell>
                       <TableCell>{student.name}</TableCell>
                       <TableCell>
-                        {student.parent?.name} ({student.parent?.relation})
-                      </TableCell>
-                      <TableCell>{student.parent?.mobile_no}</TableCell>
-                      <TableCell>
                         {student.class_room?.class_no}
                         {student.class_room?.class_section
                           ? `-${student.class_room?.class_section}`
                           : ""}
                       </TableCell>
+                      <TableCell>
+                        {student.parent?.name} ({student.parent?.relation})
+                      </TableCell>
+                      <TableCell>{student.parent?.mobile_no}</TableCell>
                       <TableCell>
                         <IconButton
                           color="primary"
@@ -233,26 +259,23 @@ const Student: React.FC = () => {
             />
           </>
         ) : (
-          <Typography
-            variant="body1"
-            color="textSecondary"
-            sx={{ textAlign: "center", mt: 4 }}
-          >
-            No student data available.
-          </Typography>
+          <Box display="flex" justifyContent="center" alignItems="center" height={200}>
+            <Typography
+              variant="body1"
+              color="textSecondary"
+            >
+              No student data available.
+            </Typography>
+          </Box>
         )}
       </div>
 
-      <Drawer
-        anchor="right"
-        open={drawerOpen}
-        onClose={handleCloseDrawer}
-        PaperProps={{ sx: { width: "400px" } }}
-      >
+      <Drawer anchor="right" open={drawerOpen} onClose={handleCloseDrawer} PaperProps={{ sx: { width: "400px" } }}>
         <CreateStudent
           onClose={handleCloseDrawer}
-          onStudentCreated={handleStudentCreated}
+          onSubmit={handleSubmit}
           studentData={editStudent}
+          isLoading={isRegistering || isUpdating}
         />
       </Drawer>
     </Box>

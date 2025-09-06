@@ -8,30 +8,24 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { useAuth } from "../../../context/AuthContext";
-import { useRegisterStudent, useUpdateStudent } from "../studentApi/StudentApi";
 import { useParents } from "../../parent/parentApi/parentApi";
 import "./CreateStudent.css";
-import { toast } from "react-toastify";
 
 interface CreateStudentProps {
     onClose: () => void;
-    onStudentCreated: (student: any) => void;
+    onSubmit: (formData: any) => void;
     studentData?: any;
+    isLoading?: boolean;
 }
 
 const CreateStudent: React.FC<CreateStudentProps> = ({
     onClose,
-    onStudentCreated,
+    onSubmit,
     studentData,
+    isLoading,
 }) => {
     const { user } = useAuth();
     const organizationId = user?.organization?.org_id;
-    const { mutate: registerStudent, isPending: isCreating } =
-        useRegisterStudent();
-    const { mutate: updateStudent, isPending: isUpdating } =
-        useUpdateStudent(organizationId);
-
-    const { data: parents } = useParents(organizationId);
 
     const [formData, setFormData] = useState({
         name: "",
@@ -40,6 +34,8 @@ const CreateStudent: React.FC<CreateStudentProps> = ({
     });
 
     const [errors, setErrors] = useState<Record<string, string>>({});
+
+    const { data: parents } = useParents(organizationId);
 
     useEffect(() => {
         if (studentData) {
@@ -80,50 +76,15 @@ const CreateStudent: React.FC<CreateStudentProps> = ({
         e.preventDefault();
         if (!validate()) return;
 
-        const payload = {
-            name: formData.name,
-            parent: formData.parent ? Number(formData.parent) : null,
-            class_room: formData.class_room ? Number(formData.class_room) : null,
-            role: Number(user?.role),
-            organization: Number(user?.organization),
-        };
-
-        if (studentData) {
-            updateStudent(
-                { admission_no: studentData.admission_no, ...payload },
-                {
-                    onSuccess: (data) => {
-                        toast.success("Student updated successfully ✅");
-                        onStudentCreated(data);
-                        onClose();
-                    },
-                    onError: (err: any) => {
-                        toast.error(
-                            err?.response?.data?.message || "Failed to update student ❌"
-                        );
-                    },
-                }
-            );
-        } else {
-            registerStudent(payload, {
-                onSuccess: (data) => {
-                    toast.success("Student registered successfully ✅");
-                    onStudentCreated(data);
-                    onClose();
-                },
-                onError: (err: any) => {
-                    toast.error(
-                        err?.response?.data?.message || "Failed to register student ❌"
-                    );
-                },
-            });
-        }
+        onSubmit(formData);
     };
+
+    const isEdit = !!studentData;
 
     return (
         <Box className="create-student-container">
             <Box className="create-student-header">
-                <div>{studentData ? "Update Student" : "Register New Student"}</div>
+                <div>{isEdit ? "Update Student" : "Register New Student"}</div>
                 <IconButton onClick={onClose}>
                     <CloseIcon />
                 </IconButton>
@@ -202,7 +163,7 @@ const CreateStudent: React.FC<CreateStudentProps> = ({
             </Box>
 
             <Box className="create-student-footer">
-                <Button variant="outlined" onClick={onClose} disabled={isCreating || isUpdating}>
+                <Button variant="outlined" onClick={onClose} disabled={isLoading}>
                     Cancel
                 </Button>
                 <Button
@@ -210,13 +171,9 @@ const CreateStudent: React.FC<CreateStudentProps> = ({
                     variant="contained"
                     color="primary"
                     form="create-student-form"
-                    disabled={isCreating || isUpdating}
+                    disabled={isLoading}
                 >
-                    {isCreating || isUpdating
-                        ? "Saving..."
-                        : studentData
-                            ? "Update Student"
-                            : "Register Student"}
+                    {isLoading ? (isEdit ? "Updating..." : "Registering...") : isEdit ? "Update Student" : "Register Student"}
                 </Button>
             </Box>
         </Box>

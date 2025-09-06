@@ -14,6 +14,7 @@ import {
 import Dashboard from "../../../assets/dashboard.svg";
 import Student from "../../../assets/Users.svg";
 import Users from "../../../assets/student.svg";
+import Parent from "../../../assets/parent.svg";
 import Toolbar from "../toolbar/Toolbar";
 import "./Sidebar.css";
 import { Outlet } from "react-router-dom";
@@ -63,7 +64,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     },
     {
       label: "Parents",
-      icon: <img src={Users} alt="Parents" />,
+      icon: <img src={Parent} alt="Parents" />,
       path: "/parent"
     },
     {

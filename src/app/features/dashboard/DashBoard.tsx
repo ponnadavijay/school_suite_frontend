@@ -3,12 +3,13 @@ import { useAuth } from "../../context/AuthContext";
 import {
   CardContent,
   Divider,
+  Button,
 } from "@mui/material";
 import PeopleIcon from "@mui/icons-material/People";
-import SchoolIcon from "@mui/icons-material/School";
-import FamilyRestroomIcon from "@mui/icons-material/FamilyRestroom";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
+import FamilyRestroomIcon from "@mui/icons-material/FamilyRestroom";
+import SchoolIcon from "@mui/icons-material/School";
 import { useNavigate } from "react-router-dom";
 import "./Dashboard.css";
 import { useStudents } from "../student/studentApi/StudentApi";
@@ -40,6 +41,10 @@ const Dashboard: React.FC = () => {
       absent: number;
     }[]
   >([]);
+
+  // track expanded selections
+  const [expandedClass, setExpandedClass] = useState<number | null>(null);
+  const [expandedSection, setExpandedSection] = useState<string | null>(null);
 
   const { data: students } = useStudents(organizationId);
   const { data: parents } = useParents(organizationId);
@@ -126,57 +131,42 @@ const Dashboard: React.FC = () => {
     navigate(path);
   };
 
-  const cards = [
-    {
-      title: "Total Teachers",
-      count: counts.teachersTotal,
-      icon: <SchoolIcon className="card-icon" />,
-      bgColor: "#2A1989",
-      path: "/teacher",
-    },
-    {
-      title: "Present Teachers",
-      count: counts.teachersPresent,
-      icon: <CheckCircleIcon className="card-icon" />,
-      bgColor: "#13b11bff",
-      path: "/teacher",
-    },
-    {
-      title: "Absent Teachers",
-      count: counts.teachersAbsent,
-      icon: <CancelIcon className="card-icon" />,
-      bgColor: "#ff202f",
-      path: "/teacher",
-    },
-    {
-      title: "Total Students",
-      count: counts.studentsTotal,
-      icon: <PeopleIcon className="card-icon" />,
-      bgColor: "#2A1989",
-      path: "/student",
-    },
-    {
-      title: "Present Students",
-      count: counts.studentsPresent,
-      icon: <CheckCircleIcon className="card-icon" />,
-      bgColor: "#13b11bff",
-      path: "/student",
-    },
-    {
-      title: "Absent Students",
-      count: counts.studentsAbsent,
-      icon: <CancelIcon className="card-icon" />,
-      bgColor: "#ff202f",
-      path: "/student",
-    },
-    {
-      title: "Total Parents",
-      count: counts.parents,
-      icon: <FamilyRestroomIcon className="card-icon" />,
-      bgColor: "#2A1989",
-      path: "/parent",
-    },
-  ];
+  useEffect(() => {
+    if (expandedClass) {
+      const firstSection = classSectionWise.find(
+        (cls) => cls.classId === expandedClass
+      );
+      if (firstSection) {
+        setExpandedSection(`${firstSection.classId}-${firstSection.section}`);
+      }
+    } else {
+      setExpandedSection(null);
+    }
+  }, [expandedClass, classSectionWise]);
+
+  useEffect(() => {
+    if (classSectionWise.length > 0 && !expandedClass) {
+      const firstClassId = classSectionWise[0].classId;
+      setExpandedClass(firstClassId);
+      const firstSection = classSectionWise.find(
+        (cls) => cls.classId === firstClassId
+      );
+      if (firstSection) {
+        setExpandedSection(`${firstSection.classId}-${firstSection.section}`);
+      }
+    }
+  }, [classSectionWise, expandedClass]);
+
+  const getOrdinal = (n: number) => {
+    const s = ["th", "st", "nd", "rd"];
+    const v = n % 100;
+    return n + (s[(v - 20) % 10] || s[v] || s[0]);
+  };
+
+  const classList = Array.from({ length: 10 }, (_, i) => ({
+    classId: i + 1,
+    className: `${getOrdinal(i + 1)} Class`,
+  }));
 
   return (
     <div className="dashboard-container">
@@ -187,7 +177,57 @@ const Dashboard: React.FC = () => {
 
       <div className="section-title">Key Metrics</div>
       <div className="cards-container">
-        {cards.map((card) => (
+        {[
+          {
+            title: "Total Teachers",
+            count: counts.teachersTotal,
+            icon: <SchoolIcon className="card-icon" />,
+            bgColor: "#2A1989",
+            path: "/teacher",
+          },
+          {
+            title: "Present Teachers",
+            count: counts.teachersPresent,
+            icon: <CheckCircleIcon className="card-icon" />,
+            bgColor: "#13b11bff",
+            path: "/teacher",
+          },
+          {
+            title: "Absent Teachers",
+            count: counts.teachersAbsent,
+            icon: <CancelIcon className="card-icon" />,
+            bgColor: "#ff202f",
+            path: "/teacher",
+          },
+          {
+            title: "Total Students",
+            count: counts.studentsTotal,
+            icon: <PeopleIcon className="card-icon" />,
+            bgColor: "#2A1989",
+            path: "/student",
+          },
+          {
+            title: "Present Students",
+            count: counts.studentsPresent,
+            icon: <CheckCircleIcon className="card-icon" />,
+            bgColor: "#13b11bff",
+            path: "/student",
+          },
+          {
+            title: "Absent Students",
+            count: counts.studentsAbsent,
+            icon: <CancelIcon className="card-icon" />,
+            bgColor: "#ff202f",
+            path: "/student",
+          },
+          {
+            title: "Total Parents",
+            count: counts.parents,
+            icon: <FamilyRestroomIcon className="card-icon" />,
+            bgColor: "#2A1989",
+            path: "/parent",
+          },
+        ].map((card) => (
           <div
             key={card.title}
             className="dashboard-card"
@@ -202,16 +242,10 @@ const Dashboard: React.FC = () => {
                   {card.icon}
                 </div>
                 <div>
-                  <div
-                    className="card-title"
-                    style={{ color: card.bgColor }}
-                  >
+                  <div className="card-title" style={{ color: card.bgColor }}>
                     {card.title}
                   </div>
-                  <div
-                    className="card-value"
-                    style={{ color: card.bgColor }}
-                  >
+                  <div className="card-value" style={{ color: card.bgColor }}>
                     {card.count}
                   </div>
                 </div>
@@ -224,20 +258,103 @@ const Dashboard: React.FC = () => {
       <Divider className="divider" />
 
       <div className="section-sub-title">Class & Section-wise Attendance</div>
-      <div className="class-section-container">
-        {classSectionWise.map((cls) => (
-          <div key={`${cls.classId}-${cls.section}`} className="class-card">
-            <CardContent>
-              <div className="class-title">
-                {cls.className} - {cls.section} Section
-              </div>
-              <div className="total-text">Total Students: <div className="class-section-value">{cls.total}</div></div>
-              <div className="present-text">Present Students: <div className="class-section-value">{cls.present}</div></div>
-              <div className="absent-text">Absent Students: <div className="class-section-value">{cls.absent}</div></div>
-            </CardContent>
-          </div>
+
+      <div className="class-buttons">
+        {classList.map((cls) => (
+          <Button
+            key={cls.classId}
+            variant={expandedClass === cls.classId ? "contained" : "outlined"}
+            color="primary"
+            onClick={() =>
+              setExpandedClass(expandedClass === cls.classId ? null : cls.classId)
+            }
+          >
+            {cls.className}
+          </Button>
         ))}
       </div>
+
+      {expandedClass && (
+        <div>
+          <div className="section-buttons">
+            {classSectionWise
+              .filter((cls) => cls.classId === expandedClass)
+              .map((cls) => {
+                const key = `${cls.classId}-${cls.section}`;
+                const isExpanded = expandedSection === key;
+                return (
+                  <Button
+                    key={key}
+                    variant={isExpanded ? "contained" : "outlined"}
+                    onClick={() => setExpandedSection(isExpanded ? null : key)}
+                    style={{ minWidth: "120px", textTransform: "none" }}
+                  >
+                    {cls.section} Section
+                  </Button>
+                );
+              })}
+          </div>
+
+          {expandedSection && (
+            <div className="section-cards-row">
+              {(() => {
+                const cls = classSectionWise.find(
+                  (c) => `${c.classId}-${c.section}` === expandedSection
+                );
+                if (!cls) return null;
+                return [
+                  {
+                    title: "Total Students",
+                    count: cls.total,
+                    icon: <PeopleIcon className="card-icon" />,
+                    bgColor: "#2A1989",
+                  },
+                  {
+                    title: "Present Students",
+                    count: cls.present,
+                    icon: <CheckCircleIcon className="card-icon" />,
+                    bgColor: "#13b11bff",
+                  },
+                  {
+                    title: "Absent Students",
+                    count: cls.absent,
+                    icon: <CancelIcon className="card-icon" />,
+                    bgColor: "#ff202f",
+                  },
+                ].map((card) => (
+                  <div key={card.title} className="dashboard-card">
+                    <CardContent className="card-content">
+                      <div className="card-main-content">
+                        <div
+                          className="card-icon-container"
+                          style={{ backgroundColor: card.bgColor }}
+                        >
+                          {card.icon}
+                        </div>
+                        <div>
+                          <div
+                            className="card-title"
+                            style={{ color: card.bgColor }}
+                          >
+                            {card.title}
+                          </div>
+                          <div
+                            className="card-value"
+                            style={{ color: card.bgColor }}
+                          >
+                            {card.count}
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </div>
+                ));
+              })()}
+            </div>
+          )}
+        </div>
+      )}
+
     </div>
   );
 };

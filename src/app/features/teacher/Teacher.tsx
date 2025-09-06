@@ -69,18 +69,28 @@ const Teacher: React.FC = () => {
           teacher_id: editTeacher.teacher_id,
           ...teacherData,
         });
-        toast.success("Teacher updated successfully!");
+        toast.success("Teacher updated successfully ✅");
       } else {
         await createTeacherMutation.mutateAsync({
           ...teacherData,
           organization: organizationId,
         });
-        toast.success("Teacher created successfully!");
+        toast.success("Teacher created successfully ✅");
       }
       refetchTeachers();
       handleCloseDrawer();
-    } catch (error) {
-      toast.error("An error occurred. Please try again.");
+    } catch (error: any) {
+      const res = error?.response?.data;
+      let message = res?.message || "An error occurred ❌";
+      if (res?.data && typeof res.data === "string") {
+        try {
+          const parsed = JSON.parse(res.data.replace(/'/g, '"'));
+          if (parsed.email) {
+            message = parsed.email[0];
+          }
+        } catch { }
+      }
+      toast.error(message);
     }
   };
 
@@ -109,29 +119,31 @@ const Teacher: React.FC = () => {
 
   return (
     <Box className="teacher-page">
-      <Box className="teacher-header">
-        <div className="list-header-title">Teachers</div>
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={<AddIcon />}
-          onClick={handleOpenDrawer}
-          disabled={isLoading}
-        >
-          Create Teacher
-        </Button>
-      </Box>
+      <div className="teacher-header-container">
+        <Box className="teacher-header">
+          <div className="list-header-title">Teachers</div>
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<AddIcon />}
+            onClick={handleOpenDrawer}
+            disabled={isLoading}
+          >
+            Register Teacher
+          </Button>
+        </Box>
 
-      <Box sx={{ my: 2, display: "flex", justifyContent: "flex-start" }}>
-        <TextField
-          label="Search By Teacher"
-          variant="outlined"
-          size="small"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          sx={{ width: 300 }}
-        />
-      </Box>
+        <Box sx={{ my: 2, display: "flex", justifyContent: "flex-start" }}>
+          <TextField
+            label="Search By Teacher"
+            variant="outlined"
+            size="small"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            sx={{ width: 300 }}
+          />
+        </Box>
+      </div>
 
       <div>
         {isLoading && (
@@ -140,19 +152,26 @@ const Teacher: React.FC = () => {
           </Box>
         )}
 
-        {isError && <Typography color="error">Failed to load teachers</Typography>}
+        {isError && (
+          <Box display="flex" justifyContent="center" alignItems="center" height={200}>
+            <Typography variant="h6">
+              Session expired, please relogin!
+            </Typography>
+          </Box>
+        )}
 
-        {!isLoading && filteredTeachers.length > 0 && (
+        {!isLoading && !isError && filteredTeachers.length > 0 && (
           <>
             <TableContainer component={Paper}>
               <Table sx={{ borderCollapse: "collapse" }}>
                 <TableHead>
                   <TableRow>
-                    <TableCell>ID</TableCell>
-                    <TableCell>Name</TableCell>
+                    <TableCell>Teacher ID</TableCell>
+                    <TableCell>Teacher Name</TableCell>
                     <TableCell>Email</TableCell>
                     <TableCell>Qualification</TableCell>
-                    <TableCell>Action</TableCell>
+                    <TableCell>Mobile Number</TableCell>
+                    <TableCell>ActionS</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -161,7 +180,8 @@ const Teacher: React.FC = () => {
                       <TableCell>{teacher.teacher_id}</TableCell>
                       <TableCell>{teacher.name}</TableCell>
                       <TableCell>{teacher.email}</TableCell>
-                      <TableCell>{teacher.qualification || "-"}</TableCell>
+                      <TableCell>{teacher.qualification}</TableCell>
+                      <TableCell>{teacher.mobile_no}</TableCell>
                       <TableCell>
                         <IconButton
                           onClick={() => navigate(`/teacher/view/${teacher.teacher_id}`)}
@@ -190,8 +210,15 @@ const Teacher: React.FC = () => {
           </>
         )}
 
-        {!isLoading && filteredTeachers.length === 0 && (
-          <Typography sx={{ mt: 2 }}>No teachers found.</Typography>
+        {!isLoading && !isError && filteredTeachers.length === 0 && (
+          <Box display="flex" justifyContent="center" alignItems="center" height={200}>
+            <Typography
+              variant="body1"
+              color="textSecondary"
+            >
+              No Teachers data please register teacher.
+            </Typography>
+          </Box>
         )}
       </div>
 
@@ -205,7 +232,9 @@ const Teacher: React.FC = () => {
           onClose={handleCloseDrawer}
           onSubmit={handleSubmit}
           teacherData={editTeacher}
-          isLoading={editTeacher ? updateTeacherMutation.isLoading : createTeacherMutation.isLoading}
+          isLoading={
+            editTeacher ? updateTeacherMutation.isLoading : createTeacherMutation.isLoading
+          }
         />
       </Drawer>
     </Box>
