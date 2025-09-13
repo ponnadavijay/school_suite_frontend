@@ -98,3 +98,8 @@
 .profile-menu-item:hover {
     background-color: #f0f0f0;
 }
+
+.toolbar-header-title {
+    display: flex;
+    font-size: 1.3rem;
+}

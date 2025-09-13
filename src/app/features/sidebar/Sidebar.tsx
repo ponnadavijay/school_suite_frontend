@@ -15,6 +15,7 @@ import Dashboard from "../../../assets/dashboard.svg";
 import Student from "../../../assets/Users.svg";
 import Users from "../../../assets/student.svg";
 import Parent from "../../../assets/parent.svg";
+import Attendance from "../../../assets/attendance.svg";
 import Toolbar from "../toolbar/Toolbar";
 import "./Sidebar.css";
 import { Outlet } from "react-router-dom";
@@ -59,8 +60,13 @@ const Sidebar: React.FC<SidebarProps> = ({
     },
     {
       label: "Teachers",
-      icon: <img src={Users} alt="Teachers" />,
+      icon: <img src={Users} alt="Users" />,
       path: "/teacher"
+    },
+    {
+      label: "Teacher Attendance",
+      icon: <img src={Attendance} alt="Attendance" />,
+      path: "/teacher/attandance"
     },
     {
       label: "Parents",
@@ -72,6 +78,11 @@ const Sidebar: React.FC<SidebarProps> = ({
       icon: <img src={Student} alt="Students" />,
       path: "/student"
     },
+    {
+      label: "Student Attendance",
+      icon: <img src={Attendance} alt="Attendance" />,
+      path: "/student/attandance"
+    }
   ];
 
   const handleClick = (path: string) => {

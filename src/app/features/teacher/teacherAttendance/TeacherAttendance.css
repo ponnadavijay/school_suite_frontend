@@ -1,0 +1,68 @@
+.teacher-attendance-header {
+    background-color: #f5f5f5;
+    padding: 8px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 8px;
+}
+
+.attendance-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1rem;
+}
+
+.custom-dialog-content {
+    padding: 0 2rem;
+    font-size: 15px;
+}
+
+.teacher-attendance-title {
+    font-size: 1.5rem;
+    font-weight: var(--bold-font-weight);
+    color: var(--primary-purple-600);
+    font-family: var(--font-family);
+}
+
+.attendance-summary-count {
+    display: flex;
+    font-size: 1.2rem;
+    font-family: var(--font-family);
+}
+
+.summary-stats {
+    display: flex;
+    gap: 16px;
+    margin-top: 5px;
+}
+
+.summary-stats .total {
+    font-weight: bold;
+}
+
+.summary-stats .present {
+    color: #13B11B;
+    font-weight: bold;
+}
+
+.summary-stats .absent {
+    color: #ff202f;
+    font-weight: bold;
+}
+
+.loading-text {
+    font-size: 16px;
+}
+
+.error-text {
+    color: #ff202f;
+    font-weight: bold;
+}
+
+.no-teachers-text {
+    text-align: center;
+    font-size: 16px;
+    color: gray;
+}

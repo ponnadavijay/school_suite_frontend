@@ -57,8 +57,8 @@ const Toolbar: React.FC<ToolbarProps> = ({ sidebarOpen, onToggleSidebar }) => {
         >
           <MenuIcon />
         </IconButton>
-        <div>
-          Tech Patashala
+        <div className="toolbar-header-title">
+          {user?.organization?.org_name}
         </div>
         <Box sx={{ flexGrow: 1 }} />
         <div className="profile-container">
@@ -69,7 +69,7 @@ const Toolbar: React.FC<ToolbarProps> = ({ sidebarOpen, onToggleSidebar }) => {
             style={{ cursor: "pointer", display: "flex", alignItems: "center" }}
           >
             <Avatar className="profile-avatar">
-              {user?.email?.charAt(0).toUpperCase() || "U"}
+              {user?.organization?.org_name?.charAt(0).toUpperCase() || "U"}
             </Avatar>
           </div>
 
@@ -85,11 +85,11 @@ const Toolbar: React.FC<ToolbarProps> = ({ sidebarOpen, onToggleSidebar }) => {
             <MenuItem className="profile-menu-header">
               <Box display="flex" alignItems="center">
                 <Avatar className="profile-menu-avatar">
-                  {user?.email?.charAt(0).toUpperCase() || 'U'}
+                  {user?.organization?.org_name?.charAt(0).toUpperCase() || 'U'}
                 </Avatar>
                 <Box ml={2}>
                   <Typography variant="subtitle1" className="profile-menu-email">
-                    {user?.email || 'User'}
+                    {user?.organization?.org_name || 'User'}
                   </Typography>
                 </Box>
               </Box>

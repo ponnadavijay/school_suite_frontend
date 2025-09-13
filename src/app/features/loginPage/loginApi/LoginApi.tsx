@@ -1,7 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import axios from 'axios';
 
-const BASE_URL = 'http://13.203.135.43';
+const BASE_URL = 'http://52.66.173.231:8001';
 
 interface User {
   id: string;

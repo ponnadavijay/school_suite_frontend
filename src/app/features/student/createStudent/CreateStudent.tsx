@@ -9,6 +9,7 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import { useAuth } from "../../../context/AuthContext";
 import { useParents } from "../../parent/parentApi/parentApi";
+import { useClassrooms } from "../studentApi/studentApi"; // Adjust import path
 import "./CreateStudent.css";
 
 interface CreateStudentProps {
@@ -36,6 +37,7 @@ const CreateStudent: React.FC<CreateStudentProps> = ({
     const [errors, setErrors] = useState<Record<string, string>>({});
 
     const { data: parents } = useParents(organizationId);
+    const { data: classrooms } = useClassrooms(organizationId);
 
     useEffect(() => {
         if (studentData) {
@@ -62,7 +64,7 @@ const CreateStudent: React.FC<CreateStudentProps> = ({
         const newErrors: Record<string, string> = {};
         if (!formData.name) newErrors.name = "Name is required";
         if (!formData.parent) newErrors.parent = "Parent is required";
-        if (!formData.class_room) newErrors.class_room = "Class Room is required";
+        if (!formData.class_room) newErrors.class_room = "Classroom is required";
 
         if (formData.name && formData.name.length > 200) {
             newErrors.name = "Name must be less than 200 characters";
@@ -147,17 +149,43 @@ const CreateStudent: React.FC<CreateStudentProps> = ({
                         )}
                     />
                 </Box>
+                
                 <Box mb={2}>
-                    <TextField
-                        label="Class Room ID"
-                        name="class_room"
-                        type="number"
-                        value={formData.class_room}
-                        onChange={handleChange}
-                        error={!!errors.class_room}
-                        helperText={errors.class_room || ""}
-                        fullWidth
-                        required
+                    <Autocomplete
+                        options={classrooms || []}
+                        getOptionLabel={(option: Classroom) => 
+                            `Class ${option.class_no}${option.class_section ? ` - Section ${option.class_section}` : ''}`
+                        }
+                        value={
+                            classrooms?.find((c: Classroom) => String(c.class_id) === String(formData.class_room)) ||
+                            null
+                        }
+                        isOptionEqualToValue={(option: Classroom, value: Classroom) =>
+                            String(option.class_id) === String(value.class_id)
+                        }
+                        onChange={(_, newValue) => {
+                            setFormData((prev) => ({
+                                ...prev,
+                                class_room: newValue ? newValue.class_id : "",
+                            }));
+                            if (errors.class_room) {
+                                setErrors((prev) => ({ ...prev, class_room: "" }));
+                            }
+                        }}
+                        renderOption={(props, option) => (
+                            <li {...props}>
+                                Class {option.class_no}{option.class_section && ` - Section ${option.class_section}`}
+                            </li>
+                        )}
+                        renderInput={(params) => (
+                            <TextField
+                                {...params}
+                                label="Select Classroom"
+                                error={!!errors.class_room}
+                                helperText={errors.class_room || ""}
+                                required
+                            />
+                        )}
                     />
                 </Box>
             </Box>

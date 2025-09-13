@@ -30,9 +30,9 @@ const Profile: React.FC<ProfileProps> = ({ open, onClose }) => {
             <DialogContent>
                 <Box display="flex" flexDirection="column" alignItems="center" p={2}>
                     <Avatar sx={{ width: 64, height: 64, mb: 2 }}>
-                        {user?.email?.charAt(0).toUpperCase() || 'U'}
+                        {user?.organization?.org_name?.charAt(0).toUpperCase() || 'U'}
                     </Avatar>
-                    <Typography variant="h6">{user?.email || 'User'}</Typography>
+                    <Typography variant="h6">{user?.organization?.org_name || 'User'}</Typography>
                 </Box>
             </DialogContent>
             <DialogActions>

@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { useMutation } from '@tanstack/react-query';
 
-const BASE_URL = 'http://13.203.135.43';
+const BASE_URL = 'http://52.66.173.231:8001';
 
 export interface RegisterPayload {
   email: string;

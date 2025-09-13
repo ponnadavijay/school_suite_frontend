@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
 import { useAuth } from "../../../context/AuthContext";
 
-const BASE_URL = "http://13.203.135.43";
+const BASE_URL = 'http://52.66.173.231:8001';
 
 export interface CreateStudentPayload {
   name: string;
@@ -186,6 +186,162 @@ export const useDeleteStudent = (organizationId?: number) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["students", organizationId] });
+      queryClient.invalidateQueries({ queryKey: ["studentsBySection"] });
+    },
+  });
+};
+
+// Add to your API file
+
+export interface Classroom {
+  class_id: number;
+  class_no: number;
+  class_section: string;
+  incharge: number;
+  organization: number;
+}
+
+// Fetch all classrooms for an organization
+const fetchClassrooms = async (organizationId: number): Promise<Classroom[]> => {
+  const response = await api.get(`/users/api/listclass`);
+  // Filter classrooms by organization if needed, or adjust endpoint if it supports query params
+  const allClassrooms = response.data;
+  return allClassrooms.filter((classroom: Classroom) => classroom.organization === organizationId);
+};
+
+// Fetch classroom by ID
+const fetchClassroom = async (class_id: number): Promise<Classroom> => {
+  const response = await api.get(`/users/api/listclass/${class_id}/`);
+  return response.data;
+};
+
+// Create classroom
+const createClassroom = async (payload: Omit<Classroom, 'class_id'>): Promise<Classroom> => {
+  const response = await api.post(`/users/api/listclass/`, payload);
+  return response.data;
+};
+
+// Update classroom
+const updateClassroom = async (class_id: number, payload: Partial<Classroom>): Promise<Classroom> => {
+  const response = await api.put(`/users/api/listclass/${class_id}/`, payload);
+  return response.data;
+};
+
+// Delete classroom
+const deleteClassroom = async (class_id: number): Promise<void> => {
+  await api.delete(`/users/api/listclass/${class_id}/`);
+};
+
+// Hooks
+export const useClassrooms = (organizationId?: number) => {
+  const { accessToken } = useAuth();
+
+  return useQuery<Classroom[], ApiError>({
+    queryKey: ["classrooms", organizationId],
+    queryFn: () => {
+      if (accessToken) setAuthHeader(accessToken);
+      return fetchClassrooms(organizationId!);
+    },
+    enabled: !!organizationId,
+    keepPreviousData: true,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+};
+
+export const useClassroom = (class_id?: number) => {
+  const { accessToken } = useAuth();
+
+  return useQuery<Classroom, ApiError>({
+    queryKey: ["classroom", class_id],
+    queryFn: () => {
+      if (accessToken) setAuthHeader(accessToken);
+      return fetchClassroom(class_id!);
+    },
+    enabled: !!class_id,
+  });
+};
+
+export const useCreateClassroom = () => {
+  const { accessToken } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation<Classroom, ApiError, Omit<Classroom, 'class_id'>>({
+    mutationFn: (payload) => {
+      if (accessToken) setAuthHeader(accessToken);
+      return createClassroom(payload);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["classrooms"] });
+    },
+  });
+};
+
+export const useUpdateClassroom = () => {
+  const { accessToken } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation<Classroom, ApiError, { class_id: number } & Partial<Classroom>>({
+    mutationFn: ({ class_id, ...payload }) => {
+      if (accessToken) setAuthHeader(accessToken);
+      return updateClassroom(class_id, payload);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["classrooms"] });
+      queryClient.invalidateQueries({ queryKey: ["classroom"] });
+    },
+  });
+};
+
+export const useDeleteClassroom = () => {
+  const { accessToken } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation<void, ApiError, number>({
+    mutationFn: (class_id) => {
+      if (accessToken) setAuthHeader(accessToken);
+      return deleteClassroom(class_id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["classrooms"] });
+    },
+  });
+};
+
+// ============================
+// Bulk Update Attendance
+// ============================
+
+export interface BulkUpdateAttendancePayload {
+  name: string;
+  parent: number;
+  class_room: number;
+  role: number;
+  organization: number;
+  present_status: "Present" | "Absent"; // restrict to allowed values
+}
+
+const bulkUpdateAttendance = async (
+  payload: BulkUpdateAttendancePayload
+): Promise<any> => {
+  const response = await api.put(
+    `/student/Students/bulk-update-attendance/`,
+    payload
+  );
+  return response.data;
+};
+
+export const useBulkUpdateAttendance = () => {
+  const { accessToken } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation<any, ApiError, BulkUpdateAttendancePayload>({
+    mutationFn: (payload) => {
+      if (accessToken) setAuthHeader(accessToken);
+      return bulkUpdateAttendance(payload);
+    },
+    onSuccess: () => {
+      // refresh all related student queries
+      queryClient.invalidateQueries({ queryKey: ["students"] });
       queryClient.invalidateQueries({ queryKey: ["studentsBySection"] });
     },
   });

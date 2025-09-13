@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
 import { useAuth } from "../../../context/AuthContext";
 
-const BASE_URL = "http://13.203.135.43";
+const BASE_URL = 'http://52.66.173.231:8001';
 
 // ================== Types ==================
 export interface Teacher {
@@ -174,5 +174,30 @@ export const useGetOneTeacher = (teacherId: number) => {
       return fetchOneTeacher(teacherId);
     },
     enabled: !!accessToken && !!teacherId,
+  });
+};
+
+export interface BulkTeacherAttendancePayload {
+  teacher_ids: number[];
+  present_status: "Present" | "Absent";
+}
+
+const bulkUpdateTeacherAttendance = async (payload: BulkTeacherAttendancePayload): Promise<any> => {
+  const response = await api.put(`/teacher/teachers/bulk-update-attendance/`, payload);
+  return response.data;
+};
+
+export const useBulkUpdateTeacherAttendance = () => {
+  const { accessToken } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation<any, Error, BulkTeacherAttendancePayload>({
+    mutationFn: async (payload) => {
+      if (accessToken) setAuthHeader(accessToken);
+      return bulkUpdateTeacherAttendance(payload);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["teachers"] });
+    },
   });
 };
