@@ -25,7 +25,7 @@ const Profile: React.FC<ProfileProps> = ({ open, onClose }) => {
     };
 
     return (
-        <Dialog open={open} onClose={onClose}>
+        <Dialog open={open} onClose={onClose} disableRestoreFocus>
             <DialogTitle>User Profile</DialogTitle>
             <DialogContent>
                 <Box display="flex" flexDirection="column" alignItems="center" p={2}>

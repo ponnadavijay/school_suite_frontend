@@ -221,12 +221,14 @@ const Dashboard: React.FC = () => {
         </Box>
         <Box display="flex" gap={1.5} alignItems="center">
           <Tooltip title="Refresh Dashboard Stats">
-            <IconButton
-              onClick={handleRefreshAll}
-              className="page-header-icon-btn"
-            >
-              <RefreshIcon fontSize="small" />
-            </IconButton>
+            <span>
+              <IconButton
+                onClick={handleRefreshAll}
+                className="page-header-icon-btn"
+              >
+                <RefreshIcon fontSize="small" />
+              </IconButton>
+            </span>
           </Tooltip>
           <Button
             variant="contained"
@@ -347,7 +349,7 @@ const Dashboard: React.FC = () => {
           <Button
             size="small"
             variant="outlined"
-            onClick={() => navigate("/student/attandance")}
+            onClick={() => navigate("/attendance?tab=student")}
             sx={{ textTransform: "none", fontWeight: 600, borderRadius: "8px" }}
           >
             Open Attendance Register

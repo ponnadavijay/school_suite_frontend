@@ -194,13 +194,15 @@ const Permissions: React.FC = () => {
         </Box>
         <Box display="flex" gap={1.5} alignItems="center">
           <Tooltip title="Refresh Permissions">
-            <IconButton
-              onClick={() => refetch()}
-              disabled={isFetching}
-              className="page-header-icon-btn"
-            >
-              <RefreshIcon fontSize="small" />
-            </IconButton>
+            <span>
+              <IconButton
+                onClick={() => refetch()}
+                disabled={isFetching}
+                className="page-header-icon-btn"
+              >
+                <RefreshIcon fontSize="small" />
+              </IconButton>
+            </span>
           </Tooltip>
           <Button
             variant="contained"
@@ -415,22 +417,26 @@ const Permissions: React.FC = () => {
                         <TableCell align="right">
                           <Box display="flex" justifyContent="flex-end" gap={1}>
                             <Tooltip title="Edit Permission in Drawer">
-                              <IconButton
-                                size="small"
-                                className="action-btn-edit"
-                                onClick={() => handleOpenEditDrawer(item)}
-                              >
-                                <EditIcon fontSize="small" />
-                              </IconButton>
+                              <span>
+                                <IconButton
+                                  size="small"
+                                  className="action-btn-edit"
+                                  onClick={() => handleOpenEditDrawer(item)}
+                                >
+                                  <EditIcon fontSize="small" />
+                                </IconButton>
+                              </span>
                             </Tooltip>
                             <Tooltip title="Delete Permission">
-                              <IconButton
-                                size="small"
-                                className="action-btn-delete"
-                                onClick={() => handleOpenDeleteDialog(item)}
-                              >
-                                <DeleteOutlineIcon fontSize="small" />
-                              </IconButton>
+                              <span>
+                                <IconButton
+                                  size="small"
+                                  className="action-btn-delete"
+                                  onClick={() => handleOpenDeleteDialog(item)}
+                                >
+                                  <DeleteOutlineIcon fontSize="small" />
+                                </IconButton>
+                              </span>
                             </Tooltip>
                           </Box>
                         </TableCell>
@@ -461,6 +467,7 @@ const Permissions: React.FC = () => {
         anchor="right"
         open={drawerOpen}
         onClose={handleCloseDrawer}
+        disableRestoreFocus
         PaperProps={{
           sx: {
             width: { xs: "100%", sm: 460 },
@@ -482,6 +489,7 @@ const Permissions: React.FC = () => {
       <Dialog
         open={deleteDialogOpen}
         onClose={handleCloseDeleteDialog}
+        disableRestoreFocus
         PaperProps={{ sx: { borderRadius: "14px", p: 1 } }}
       >
         <DialogTitle sx={{ fontWeight: 700, color: "#1e293b" }}>

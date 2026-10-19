@@ -63,27 +63,28 @@ const StudentAttendance: React.FC = () => {
     : classrooms?.data || classrooms?.items || [];
 
   const classNumbers = Array.from(
-    new Set(classroomsList?.map((cls: any) => cls.class_no) || [])
-  ).sort();
+    new Set(classroomsList?.map((cls: any) => Number(cls.class_no)).filter((n: any) => !isNaN(n)) || [])
+  ).sort((a: any, b: any) => a - b);
 
   const sections =
     classroomsList
-      ?.filter((cls: any) => cls.class_no === selectedClass)
+      ?.filter((cls: any) => Number(cls.class_no) === Number(selectedClass))
       .map((cls: any) => cls.section)
       .sort() || [];
 
   useEffect(() => {
-    if (selectedClass && selectedSection && students) {
+    if (selectedClass !== null && selectedSection && students) {
       let filtered = students.filter((student) => {
         return (
-          student.class_room?.class_no === selectedClass &&
-          student.class_room?.section === selectedSection
+          Number(student.class_room?.class_no) === Number(selectedClass) &&
+          String(student.class_room?.section || "").trim().toLowerCase() === String(selectedSection || "").trim().toLowerCase()
         );
       });
 
       const initialAttendance: Record<string, string> = {};
       filtered.forEach((s) => {
-        initialAttendance[s.admission_no] = "Present";
+        const key = s.admission_no || s.u_id || s.id;
+        initialAttendance[key] = "Present";
       });
       setAttendanceMap(initialAttendance);
       setFilteredStudents(filtered);
@@ -187,13 +188,15 @@ const StudentAttendance: React.FC = () => {
         </Box>
         <Box display="flex" gap={1.5} alignItems="center">
           <Tooltip title="Refresh Student List">
-            <IconButton
-              onClick={() => refetchStudents()}
-              disabled={isLoading}
-              className="page-header-icon-btn"
-            >
-              <RefreshIcon fontSize="small" />
-            </IconButton>
+            <span>
+              <IconButton
+                onClick={() => refetchStudents()}
+                disabled={isLoading}
+                className="page-header-icon-btn"
+              >
+                <RefreshIcon fontSize="small" />
+              </IconButton>
+            </span>
           </Tooltip>
           {selectedClass && selectedSection && (
             <Button
@@ -343,7 +346,7 @@ const StudentAttendance: React.FC = () => {
         </>
       )}
 
-      <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)}>
+      <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)} disableRestoreFocus>
         <DialogTitle>Confirm Attendance Submission</DialogTitle>
         <div className="custom-dialog-content">
           <div>

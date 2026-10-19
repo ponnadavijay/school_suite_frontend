@@ -46,7 +46,7 @@ const TeacherAttendance: React.FC = () => {
   const { user } = useAuth();
   const organizationId = user?.organization?.org_id;
 
-  const { data: teachers, isLoading, isError, refetch } =
+  const { data: teachers, isLoading, isError, refetch: refetchTeachers } =
     useGetAllTeachers(organizationId);
 
   const bulkUpdateMutation = useBulkUpdateTeacherAttendance();
@@ -106,7 +106,7 @@ const TeacherAttendance: React.FC = () => {
       {
         onSuccess: () => {
           toast.success("Attendance updated successfully!");
-          refetch();
+          refetchTeachers();
           setConfirmOpen(false);
         },
         onError: (err: any) => {
@@ -172,13 +172,15 @@ const TeacherAttendance: React.FC = () => {
         </Box>
         <Box display="flex" gap={1.5} alignItems="center">
           <Tooltip title="Refresh Teacher List">
-            <IconButton
-              onClick={() => refetchTeachers()}
-              disabled={isLoading}
-              className="page-header-icon-btn"
-            >
-              <RefreshIcon fontSize="small" />
-            </IconButton>
+            <span>
+              <IconButton
+                onClick={() => refetchTeachers()}
+                disabled={isLoading}
+                className="page-header-icon-btn"
+              >
+                <RefreshIcon fontSize="small" />
+              </IconButton>
+            </span>
           </Tooltip>
           <Button
             variant="contained"
@@ -327,7 +329,7 @@ const TeacherAttendance: React.FC = () => {
         )}
       </div>
 
-      <Dialog open={confirmOpen} onClose={handleCloseConfirm}>
+      <Dialog open={confirmOpen} onClose={handleCloseConfirm} disableRestoreFocus>
         <DialogTitle>Confirm Attendance Submission</DialogTitle>
         <div className="custom-dialog-content">
           <div>Are you sure you want to submit Teacher Attendance?</div>

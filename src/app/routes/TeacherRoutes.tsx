@@ -2,7 +2,7 @@ import type { RouteObject } from "react-router";
 import TeacherPage from "../pages/TeacherPage";
 import CreateTeacher from "../features/teacher/createTeacher/CreateTeacher";
 import TeacherView from "../features/teacher/viewTeacher/TeacherView";
-import TeacherAttendance from "../features/teacher/teacherAttendance/TeacherAttendance";
+import AttendancePage from "../pages/AttendancePage";
 
 const TeacherRoutes: RouteObject[] = [
   {
@@ -19,7 +19,11 @@ const TeacherRoutes: RouteObject[] = [
   },
   {
     path: "attandance",
-    element: <TeacherAttendance />
+    element: <AttendancePage defaultTab="teacher" />
+  },
+  {
+    path: "attendance",
+    element: <AttendancePage defaultTab="teacher" />
   },
 ];
 

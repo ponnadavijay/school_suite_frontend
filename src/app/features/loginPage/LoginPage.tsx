@@ -40,7 +40,7 @@ const LoginPage: React.FC = () => {
     setSignInError("");
 
     loginMutation.mutate(signInData, {
-      onSuccess: (data) => {
+      onSuccess: async (data) => {
         if (data?.message && data.message !== "User does not exist") {
           const accessToken = (data as any).access_token || (data as any).token || "";
           const refreshToken = (data as any).refresh_token || "";
@@ -63,7 +63,7 @@ const LoginPage: React.FC = () => {
             }
           }
 
-          setAuthData(userObj, accessToken, refreshToken);
+          await setAuthData(userObj, accessToken, refreshToken);
           navigate("/dashboard");
         } else if (data?.message === "User does not exist") {
           setSignInError("User does not exist. Please check your credentials.");

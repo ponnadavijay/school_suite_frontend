@@ -28,6 +28,7 @@ import RefreshIcon from "@mui/icons-material/Refresh";
 import { useCreateTeacher, useUpdateTeacher, useGetAllTeachers } from "./teacherApi/TeacherApi";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import PermissionGate from "../../shared/PermissionGate";
 import "./Teacher.css";
 
 const Teacher: React.FC = () => {
@@ -135,23 +136,27 @@ const Teacher: React.FC = () => {
         </Box>
         <Box display="flex" gap={1.5} alignItems="center">
           <Tooltip title="Refresh Teachers">
-            <IconButton
-              onClick={() => refetchTeachers()}
-              disabled={isLoading}
-              className="page-header-icon-btn"
-            >
-              <RefreshIcon fontSize="small" />
-            </IconButton>
+            <span>
+              <IconButton
+                onClick={() => refetchTeachers()}
+                disabled={isLoading}
+                className="page-header-icon-btn"
+              >
+                <RefreshIcon fontSize="small" />
+              </IconButton>
+            </span>
           </Tooltip>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={handleOpenDrawer}
-            disabled={isLoading}
-            className="page-header-primary-btn"
-          >
-            Register Teacher
-          </Button>
+          <PermissionGate permission={["teacher:create", "teacher:manage", "teacher", "admin"]}>
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={handleOpenDrawer}
+              disabled={isLoading}
+              className="page-header-primary-btn"
+            >
+              Register Teacher
+            </Button>
+          </PermissionGate>
         </Box>
       </Box>
 
@@ -210,9 +215,11 @@ const Teacher: React.FC = () => {
                         >
                           <VisibilityIcon />
                         </IconButton>
-                        <IconButton color="primary" onClick={() => handleEditClick(teacher)}>
-                          <EditIcon />
-                        </IconButton>
+                        <PermissionGate permission={["teacher:edit", "teacher:manage", "teacher", "admin"]}>
+                          <IconButton color="primary" onClick={() => handleEditClick(teacher)}>
+                            <EditIcon />
+                          </IconButton>
+                        </PermissionGate>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -247,6 +254,7 @@ const Teacher: React.FC = () => {
         anchor="right"
         open={drawerOpen}
         onClose={handleCloseDrawer}
+        disableRestoreFocus
         PaperProps={{ sx: { width: "400px" } }}
       >
         <CreateTeacher

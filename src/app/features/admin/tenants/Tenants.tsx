@@ -197,13 +197,15 @@ const Tenants: React.FC = () => {
         </Box>
         <Box display="flex" gap={1.5} alignItems="center">
           <Tooltip title="Refresh Tenants">
-            <IconButton
-              onClick={() => refetch()}
-              disabled={isFetching}
-              className="page-header-icon-btn"
-            >
-              <RefreshIcon fontSize="small" />
-            </IconButton>
+            <span>
+              <IconButton
+                onClick={() => refetch()}
+                disabled={isFetching}
+                className="page-header-icon-btn"
+              >
+                <RefreshIcon fontSize="small" />
+              </IconButton>
+            </span>
           </Tooltip>
           <Button
             variant="contained"
@@ -465,22 +467,26 @@ const Tenants: React.FC = () => {
                         <TableCell align="right">
                           <Box display="flex" justifyContent="flex-end" gap={1}>
                             <Tooltip title="Edit School Details in Drawer">
-                              <IconButton
-                                size="small"
-                                className="action-btn-edit"
-                                onClick={() => handleOpenEditDrawer(t)}
-                              >
-                                <EditIcon fontSize="small" />
-                              </IconButton>
+                              <span>
+                                <IconButton
+                                  size="small"
+                                  className="action-btn-edit"
+                                  onClick={() => handleOpenEditDrawer(t)}
+                                >
+                                  <EditIcon fontSize="small" />
+                                </IconButton>
+                              </span>
                             </Tooltip>
                             <Tooltip title="Delete School Tenant">
-                              <IconButton
-                                size="small"
-                                className="action-btn-delete"
-                                onClick={() => handleOpenDeleteDialog(t)}
-                              >
-                                <DeleteOutlineIcon fontSize="small" />
-                              </IconButton>
+                              <span>
+                                <IconButton
+                                  size="small"
+                                  className="action-btn-delete"
+                                  onClick={() => handleOpenDeleteDialog(t)}
+                                >
+                                  <DeleteOutlineIcon fontSize="small" />
+                                </IconButton>
+                              </span>
                             </Tooltip>
                           </Box>
                         </TableCell>
@@ -511,6 +517,7 @@ const Tenants: React.FC = () => {
         anchor="right"
         open={drawerOpen}
         onClose={handleCloseDrawer}
+        disableRestoreFocus
         PaperProps={{
           sx: {
             width: { xs: "100%", sm: 480 },
@@ -532,6 +539,7 @@ const Tenants: React.FC = () => {
       <Dialog
         open={deleteDialogOpen}
         onClose={handleCloseDeleteDialog}
+        disableRestoreFocus
         PaperProps={{ sx: { borderRadius: "14px", p: 1 } }}
       >
         <DialogTitle sx={{ fontWeight: 700, color: "#1e293b" }}>

@@ -32,6 +32,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import SchoolIcon from "@mui/icons-material/School";
 import FamilyRestroomIcon from "@mui/icons-material/FamilyRestroom";
 import RefreshIcon from "@mui/icons-material/Refresh";
+import ClassIcon from "@mui/icons-material/Class";
 import { useAuth } from "../../context/AuthContext";
 import CreateStudent from "./createStudent/CreateStudent";
 import {
@@ -42,8 +43,11 @@ import {
   useAssignParent,
   useAssignClass,
   useClassrooms,
+  useCreateClassroom,
 } from "./studentApi/StudentApi";
 import { useParents } from "../parent/parentApi/parentApi";
+import { useTeachers } from "../teacher/teacherApi/TeacherApi";
+import PermissionGate from "../../shared/PermissionGate";
 import "./Student.css";
 import { toast } from "react-toastify";
 
@@ -67,14 +71,21 @@ const Student: React.FC = () => {
   const [targetParentId, setTargetParentId] = useState("");
   const [relation, setRelation] = useState("Father");
 
+  // Create Class Dialog State
+  const [createClassOpen, setCreateClassOpen] = useState(false);
+  const [newClassNo, setNewClassNo] = useState<number | "">("");
+  const [newSection, setNewSection] = useState("");
+  const [newClassTeacherId, setNewClassTeacherId] = useState("");
+
   const { user } = useAuth();
   const organizationId = user?.organization?.org_id;
 
   const { data: students = [], isLoading, isError, refetch, isFetching } = useStudents(organizationId);
   const { data: rawClassrooms = [] } = useClassrooms();
   const { data: rawParents = [] } = useParents();
+  const { data: rawTeachers = [] } = useTeachers();
 
-  // Safely normalize classrooms to avoid "classrooms.map is not a function"
+  // Safely normalize classrooms
   const safeClassrooms = useMemo(() => {
     if (Array.isArray(rawClassrooms)) return rawClassrooms;
     if (rawClassrooms && Array.isArray((rawClassrooms as any).data)) return (rawClassrooms as any).data;
@@ -89,11 +100,20 @@ const Student: React.FC = () => {
     return [];
   }, [rawParents]);
 
+  // Safely normalize teachers
+  const safeTeachers = useMemo(() => {
+    if (Array.isArray(rawTeachers)) return rawTeachers;
+    if (rawTeachers && Array.isArray((rawTeachers as any).data)) return (rawTeachers as any).data;
+    if (rawTeachers && Array.isArray((rawTeachers as any).results)) return (rawTeachers as any).results;
+    return [];
+  }, [rawTeachers]);
+
   const { mutateAsync: registerStudent, isPending: isRegistering } = useRegisterStudent();
   const { mutateAsync: updateStudent, isPending: isUpdating } = useUpdateStudent(organizationId);
   const { mutate: deleteStudent } = useDeleteStudent(organizationId);
   const assignParentMutation = useAssignParent();
   const assignClassMutation = useAssignClass();
+  const createClassMutation = useCreateClassroom();
 
   const handleOpenDrawer = () => {
     setEditStudent(null);
@@ -124,13 +144,14 @@ const Student: React.FC = () => {
   // Open Assign Class Dialog
   const handleOpenAssignClass = (student: any) => {
     setSelectedStudentForClass(student);
-    setTargetClassId(student.class_room?.class_id || "");
+    setTargetClassId(student.class_room?.id || student.class_room?.class_id || "");
     setAssignClassOpen(true);
   };
 
   const handleCloseAssignClass = () => {
     setAssignClassOpen(false);
     setSelectedStudentForClass(null);
+    setTargetClassId("");
   };
 
   const handleConfirmAssignClass = async () => {
@@ -138,14 +159,14 @@ const Student: React.FC = () => {
       toast.error("Please select a classroom to assign.");
       return;
     }
-    const studentId = selectedStudentForClass.u_id || selectedStudentForClass.admission_no;
+    const studentId = selectedStudentForClass.u_id || selectedStudentForClass.id || selectedStudentForClass.admission_no;
     try {
       await assignClassMutation.mutateAsync({
         student_id: String(studentId),
         class_id: String(targetClassId),
-        year: academicYear,
+        year: academicYear || "2026-2027",
       });
-      toast.success("Class assigned successfully! 🎓");
+      toast.success("Student assigned to classroom successfully! 🎓");
       refetch();
       handleCloseAssignClass();
     } catch (err: any) {
@@ -157,13 +178,14 @@ const Student: React.FC = () => {
   // Open Assign Parent Dialog
   const handleOpenAssignParent = (student: any) => {
     setSelectedStudentForParent(student);
-    setTargetParentId(student.parent?.id || student.parent?.parent_id || "");
+    setTargetParentId(student.parent?.id || student.parent?.parent_id || student.parent?.u_id || "");
     setAssignParentOpen(true);
   };
 
   const handleCloseAssignParent = () => {
     setAssignParentOpen(false);
     setSelectedStudentForParent(null);
+    setTargetParentId("");
   };
 
   const handleConfirmAssignParent = async () => {
@@ -171,7 +193,13 @@ const Student: React.FC = () => {
       toast.error("Please select a parent to assign.");
       return;
     }
-    const studentId = selectedStudentForParent.u_id || selectedStudentForParent.admission_no;
+    const studentId = selectedStudentForParent.u_id || selectedStudentForParent.id || selectedStudentForParent.admission_no;
+
+    if (String(studentId) === String(targetParentId)) {
+      toast.error("A student cannot be assigned as their own parent. Please select a registered parent.");
+      return;
+    }
+
     try {
       await assignParentMutation.mutateAsync({
         student_id: String(studentId),
@@ -182,8 +210,45 @@ const Student: React.FC = () => {
       refetch();
       handleCloseAssignParent();
     } catch (err: any) {
+      const status = err?.response?.status;
       const msg = err?.response?.data?.detail || err?.response?.data?.message || "Failed to assign parent.";
-      toast.error(`Parent link failed: ${msg} ❌`);
+      if (status === 403) {
+        toast.error(`Access Forbidden: Only [admin, teacher, class_teacher] roles can link parents. (${msg}) 🚫`);
+      } else {
+        toast.error(`Parent link failed: ${msg} ❌`);
+      }
+    }
+  };
+
+  // Create Class Dialog Handlers
+  const handleOpenCreateClass = () => {
+    setNewClassNo("");
+    setNewSection("");
+    setNewClassTeacherId("");
+    setCreateClassOpen(true);
+  };
+
+  const handleCloseCreateClass = () => {
+    setCreateClassOpen(false);
+  };
+
+  const handleConfirmCreateClass = async () => {
+    if (newClassNo === "" || !newSection.trim() || !newClassTeacherId) {
+      toast.error("Please fill in Class Number, Section, and select a Class Teacher.");
+      return;
+    }
+
+    try {
+      await createClassMutation.mutateAsync({
+        class_no: Number(newClassNo),
+        section: newSection.trim().toUpperCase(),
+        class_teacher_id: String(newClassTeacherId),
+      });
+      toast.success(`Class ${newClassNo} - Section ${newSection.trim().toUpperCase()} created successfully! 🏫`);
+      handleCloseCreateClass();
+    } catch (err: any) {
+      const msg = err?.response?.data?.detail || err?.response?.data?.message || "Failed to create class.";
+      toast.error(`Class creation failed: ${msg} ❌`);
     }
   };
 
@@ -282,22 +347,47 @@ const Student: React.FC = () => {
         </Box>
         <Box display="flex" gap={1.5} alignItems="center">
           <Tooltip title="Refresh Student List">
-            <IconButton
-              onClick={() => refetch()}
-              disabled={isFetching}
-              className="page-header-icon-btn"
-            >
-              <RefreshIcon fontSize="small" />
-            </IconButton>
+            <span>
+              <IconButton
+                onClick={() => refetch()}
+                disabled={isFetching}
+                className="page-header-icon-btn"
+              >
+                <RefreshIcon fontSize="small" />
+              </IconButton>
+            </span>
           </Tooltip>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={handleOpenDrawer}
-            className="page-header-primary-btn"
-          >
-            Register Student
-          </Button>
+          <PermissionGate permission={["class:create", "class", "admin"]}>
+            <Button
+              variant="outlined"
+              startIcon={<ClassIcon />}
+              onClick={handleOpenCreateClass}
+              sx={{
+                borderColor: "rgba(255, 255, 255, 0.4)",
+                color: "#ffffff",
+                backgroundColor: "rgba(255, 255, 255, 0.1)",
+                borderRadius: "8px",
+                textTransform: "none",
+                fontWeight: 600,
+                "&:hover": {
+                  borderColor: "#ffffff",
+                  backgroundColor: "rgba(255, 255, 255, 0.2)",
+                },
+              }}
+            >
+              Create Class
+            </Button>
+          </PermissionGate>
+          <PermissionGate permission={["student:create", "student", "admin"]}>
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={handleOpenDrawer}
+              className="page-header-primary-btn"
+            >
+              Register Student
+            </Button>
+          </PermissionGate>
         </Box>
       </Box>
 
@@ -336,11 +426,14 @@ const Student: React.FC = () => {
             }}
           >
             <MenuItem value="">All Classes</MenuItem>
-            {safeClassrooms.map((cls: any) => (
-              <MenuItem key={cls.class_id} value={cls.class_id}>
-                Class {cls.class_no} - Section {cls.section}
-              </MenuItem>
-            ))}
+            {safeClassrooms.map((cls: any) => {
+              const cid = cls.id || cls.class_id;
+              return (
+                <MenuItem key={cid} value={cid}>
+                  Class {cls.class_no} - Section {cls.section}
+                </MenuItem>
+              );
+            })}
           </Select>
         </FormControl>
 
@@ -408,15 +501,17 @@ const Student: React.FC = () => {
                               sx={{ bgcolor: "#ede9fe", color: "var(--primary-purple-600)", fontWeight: 600 }}
                             />
                           ) : (
-                            <Button
-                              size="small"
-                              variant="outlined"
-                              startIcon={<SchoolIcon fontSize="small" />}
-                              onClick={() => handleOpenAssignClass(student)}
-                              sx={{ textTransform: "none", fontSize: "0.75rem", borderRadius: "8px" }}
-                            >
-                              Assign Class
-                            </Button>
+                            <PermissionGate permission={["class:assign", "student:edit", "student", "admin"]} fallback={<span style={{ color: "#94a3b8", fontSize: "0.8rem" }}>Unassigned</span>}>
+                              <Button
+                                size="small"
+                                variant="outlined"
+                                startIcon={<SchoolIcon fontSize="small" />}
+                                onClick={() => handleOpenAssignClass(student)}
+                                sx={{ textTransform: "none", fontSize: "0.75rem", borderRadius: "8px" }}
+                              >
+                                Assign Class
+                              </Button>
+                            </PermissionGate>
                           )}
                         </TableCell>
                         <TableCell>
@@ -427,56 +522,74 @@ const Student: React.FC = () => {
                               sx={{ bgcolor: "#ecfdf5", color: "#059669", fontWeight: 600 }}
                             />
                           ) : (
-                            <Button
-                              size="small"
-                              variant="outlined"
-                              color="secondary"
-                              startIcon={<FamilyRestroomIcon fontSize="small" />}
-                              onClick={() => handleOpenAssignParent(student)}
-                              sx={{ textTransform: "none", fontSize: "0.75rem", borderRadius: "8px" }}
-                            >
-                              Link Parent
-                            </Button>
+                            <PermissionGate permission={["student:assign_parent", "parent", "student", "admin"]} fallback={<span style={{ color: "#94a3b8", fontSize: "0.8rem" }}>Unlinked</span>}>
+                              <Button
+                                size="small"
+                                variant="outlined"
+                                color="secondary"
+                                startIcon={<FamilyRestroomIcon fontSize="small" />}
+                                onClick={() => handleOpenAssignParent(student)}
+                                sx={{ textTransform: "none", fontSize: "0.75rem", borderRadius: "8px" }}
+                              >
+                                Link Parent
+                              </Button>
+                            </PermissionGate>
                           )}
                         </TableCell>
                         <TableCell align="right">
                           <Box display="flex" justifyContent="flex-end" gap={0.5}>
-                            <Tooltip title="Assign Class">
-                              <IconButton
-                                size="small"
-                                color="primary"
-                                onClick={() => handleOpenAssignClass(student)}
-                              >
-                                <SchoolIcon fontSize="small" />
-                              </IconButton>
-                            </Tooltip>
-                            <Tooltip title="Assign Parent">
-                              <IconButton
-                                size="small"
-                                color="success"
-                                onClick={() => handleOpenAssignParent(student)}
-                              >
-                                <FamilyRestroomIcon fontSize="small" />
-                              </IconButton>
-                            </Tooltip>
-                            <Tooltip title="Edit Student">
-                              <IconButton
-                                size="small"
-                                color="info"
-                                onClick={() => handleEditClick(student)}
-                              >
-                                <EditIcon fontSize="small" />
-                              </IconButton>
-                            </Tooltip>
-                            <Tooltip title="Delete Student">
-                              <IconButton
-                                size="small"
-                                color="error"
-                                onClick={() => handleDeleteClick(student.admission_no || student.u_id)}
-                              >
-                                <DeleteIcon fontSize="small" />
-                              </IconButton>
-                            </Tooltip>
+                            <PermissionGate permission={["class:assign", "student:edit", "student", "admin"]}>
+                              <Tooltip title="Assign Class">
+                                <span>
+                                  <IconButton
+                                    size="small"
+                                    color="primary"
+                                    onClick={() => handleOpenAssignClass(student)}
+                                  >
+                                    <SchoolIcon fontSize="small" />
+                                  </IconButton>
+                                </span>
+                              </Tooltip>
+                            </PermissionGate>
+                            <PermissionGate permission={["student:assign_parent", "parent", "student", "admin"]}>
+                              <Tooltip title="Assign Parent">
+                                <span>
+                                  <IconButton
+                                    size="small"
+                                    color="success"
+                                    onClick={() => handleOpenAssignParent(student)}
+                                  >
+                                    <FamilyRestroomIcon fontSize="small" />
+                                  </IconButton>
+                                </span>
+                              </Tooltip>
+                            </PermissionGate>
+                            <PermissionGate permission={["student:edit", "student", "admin"]}>
+                              <Tooltip title="Edit Student">
+                                <span>
+                                  <IconButton
+                                    size="small"
+                                    color="info"
+                                    onClick={() => handleEditClick(student)}
+                                  >
+                                    <EditIcon fontSize="small" />
+                                  </IconButton>
+                                </span>
+                              </Tooltip>
+                            </PermissionGate>
+                            <PermissionGate permission={["student:delete", "student", "admin"]}>
+                              <Tooltip title="Delete Student">
+                                <span>
+                                  <IconButton
+                                    size="small"
+                                    color="error"
+                                    onClick={() => handleDeleteClick(student.admission_no || student.u_id)}
+                                  >
+                                    <DeleteIcon fontSize="small" />
+                                  </IconButton>
+                                </span>
+                              </Tooltip>
+                            </PermissionGate>
                           </Box>
                         </TableCell>
                       </TableRow>
@@ -513,6 +626,7 @@ const Student: React.FC = () => {
         anchor="right"
         open={drawerOpen}
         onClose={handleCloseDrawer}
+        disableRestoreFocus
         PaperProps={{
           sx: {
             width: { xs: "100%", sm: 460 },
@@ -534,6 +648,7 @@ const Student: React.FC = () => {
       <Dialog
         open={assignClassOpen}
         onClose={handleCloseAssignClass}
+        disableRestoreFocus
         PaperProps={{ sx: { borderRadius: "14px", minWidth: { xs: "90%", sm: 420 }, p: 1 } }}
       >
         <DialogTitle sx={{ fontWeight: 700, color: "var(--primary-purple-600)" }}>
@@ -557,11 +672,14 @@ const Student: React.FC = () => {
                 value={targetClassId}
                 onChange={(e) => setTargetClassId(String(e.target.value))}
               >
-                {safeClassrooms.map((cls: any) => (
-                  <MenuItem key={cls.class_id} value={cls.class_id}>
-                    Class {cls.class_no} - Section {cls.section}
-                  </MenuItem>
-                ))}
+                {safeClassrooms.map((cls: any) => {
+                  const cid = cls.id || cls.class_id;
+                  return (
+                    <MenuItem key={cid} value={cid}>
+                      Class {cls.class_no} - Section {cls.section}
+                    </MenuItem>
+                  );
+                })}
               </Select>
             </FormControl>
 
@@ -603,6 +721,7 @@ const Student: React.FC = () => {
       <Dialog
         open={assignParentOpen}
         onClose={handleCloseAssignParent}
+        disableRestoreFocus
         PaperProps={{ sx: { borderRadius: "14px", minWidth: { xs: "90%", sm: 420 }, p: 1 } }}
       >
         <DialogTitle sx={{ fontWeight: 700, color: "var(--primary-purple-600)" }}>
@@ -626,14 +745,25 @@ const Student: React.FC = () => {
                 value={targetParentId}
                 onChange={(e) => setTargetParentId(String(e.target.value))}
               >
-                {safeParents.map((p: any) => {
-                  const pid = p.id || p.parent_id || p.u_id;
-                  return (
-                    <MenuItem key={pid} value={pid}>
-                      {p.name || `${p.first_name || ""} ${p.last_name || ""}`} ({p.email || p.contact || "Parent"})
-                    </MenuItem>
-                  );
-                })}
+                {safeParents
+                  .filter((p: any) => {
+                    const pid = String(p.id || p.parent_id || p.u_id || "");
+                    const sid = String(selectedStudentForParent?.u_id || selectedStudentForParent?.id || selectedStudentForParent?.admission_no || "");
+                    return pid !== "" && pid !== sid;
+                  })
+                  .map((p: any) => {
+                    const pid = p.id || p.parent_id || p.u_id;
+                    return (
+                      <MenuItem key={pid} value={pid}>
+                        {p.name || `${p.first_name || ""} ${p.last_name || ""}`} ({p.email || p.contact || "Parent"})
+                      </MenuItem>
+                    );
+                  })}
+                {safeParents.length === 0 && (
+                  <MenuItem disabled value="">
+                    No registered parents found. Please add parents in Parent Management.
+                  </MenuItem>
+                )}
               </Select>
             </FormControl>
 
@@ -668,6 +798,92 @@ const Student: React.FC = () => {
               <CircularProgress size={18} color="inherit" />
             ) : (
               "Confirm Parent Link"
+            )}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Create Class Dialog: POST /api/v1/class/create_class */}
+      <Dialog
+        open={createClassOpen}
+        onClose={handleCloseCreateClass}
+        disableRestoreFocus
+        PaperProps={{ sx: { borderRadius: "14px", minWidth: { xs: "90%", sm: 440 }, p: 1 } }}
+      >
+        <DialogTitle sx={{ fontWeight: 700, color: "var(--primary-purple-600)" }}>
+          Create New Class
+        </DialogTitle>
+        <DialogContent>
+          <Box display="flex" flexDirection="column" gap={2} mt={1}>
+            <Typography variant="body2" sx={{ color: "#475569" }}>
+              Define a new classroom with grade/standard number, section, and designated class teacher.
+            </Typography>
+
+            <TextField
+              size="small"
+              fullWidth
+              required
+              label="Class Number (Grade)"
+              type="number"
+              placeholder="e.g. 1, 2, 10"
+              value={newClassNo}
+              onChange={(e) => setNewClassNo(e.target.value === "" ? "" : Number(e.target.value))}
+            />
+
+            <TextField
+              size="small"
+              fullWidth
+              required
+              label="Section"
+              placeholder="e.g. A, B, C"
+              value={newSection}
+              onChange={(e) => setNewSection(e.target.value)}
+            />
+
+            <FormControl fullWidth required size="small">
+              <InputLabel id="create-class-teacher-label">Class Teacher</InputLabel>
+              <Select
+                labelId="create-class-teacher-label"
+                label="Class Teacher"
+                value={newClassTeacherId}
+                onChange={(e) => setNewClassTeacherId(String(e.target.value))}
+              >
+                {safeTeachers.map((teacher: any) => {
+                  const tid = teacher.teacher_id || teacher.u_id || teacher.id;
+                  return (
+                    <MenuItem key={tid} value={tid}>
+                      {teacher.name || `${teacher.first_name || ""} ${teacher.last_name || ""}`} {teacher.email ? `(${teacher.email})` : ""}
+                    </MenuItem>
+                  );
+                })}
+                {safeTeachers.length === 0 && (
+                  <MenuItem disabled value="">
+                    No teachers found. Please register teachers first.
+                  </MenuItem>
+                )}
+              </Select>
+            </FormControl>
+          </Box>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={handleCloseCreateClass} sx={{ textTransform: "none", color: "#64748b" }}>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleConfirmCreateClass}
+            variant="contained"
+            disabled={createClassMutation.isPending}
+            sx={{
+              backgroundColor: "var(--primary-purple-600)",
+              "&:hover": { backgroundColor: "var(--primary-purple-700)" },
+              textTransform: "none",
+              fontWeight: 600,
+            }}
+          >
+            {createClassMutation.isPending ? (
+              <CircularProgress size={18} color="inherit" />
+            ) : (
+              "Create Class"
             )}
           </Button>
         </DialogActions>

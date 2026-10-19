@@ -10,6 +10,7 @@ import AdminRoutes from "./AdminRoutes";
 import RolesPage from "../pages/RolesPage";
 import PermissionsPage from "../pages/PermissionsPage";
 import TenantsPage from "../pages/TenantsPage";
+import AttendancePage from "../pages/AttendancePage";
 import Dashboard from "../features/dashboard/DashBoard";
 import Home from "../features/Home/Home";
 import PrivateRoute from "./PrivateRoute";
@@ -37,6 +38,18 @@ const createRoutes = (): RouteObject[] => {
           path: "dashboard",
           element: <Dashboard />,
           children: DashBoardRoutes,
+        },
+        {
+          path: "attendance",
+          element: <AttendancePage />,
+        },
+        {
+          path: "attendance/student",
+          element: <AttendancePage defaultTab="student" />,
+        },
+        {
+          path: "attendance/teacher",
+          element: <AttendancePage defaultTab="teacher" />,
         },
         {
           path: "teacher",

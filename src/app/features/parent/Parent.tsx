@@ -23,6 +23,7 @@ import { useAuth } from "../../context/AuthContext";
 import CreateParent from "./createParent/CreateParent";
 import "./Parent.css";
 import { useParents, useCreateParent, useUpdateParent } from "./parentApi/parentApi";
+import PermissionGate from "../../shared/PermissionGate";
 import { toast } from "react-toastify";
 
 const Parent: React.FC = () => {
@@ -114,14 +115,16 @@ const Parent: React.FC = () => {
             Manage parent records, guardians, and contact directory
           </Typography>
         </Box>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={handleOpenDrawer}
-          className="page-header-primary-btn"
-        >
-          Register Parent
-        </Button>
+        <PermissionGate permission={["parent:create", "parent:manage", "parent", "admin"]}>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={handleOpenDrawer}
+            className="page-header-primary-btn"
+          >
+            Register Parent
+          </Button>
+        </PermissionGate>
       </Box>
 
       <Box sx={{ mb: 3, display: "flex", justifyContent: "flex-start" }}>
@@ -169,9 +172,11 @@ const Parent: React.FC = () => {
                       <TableCell>{parent.relation}</TableCell>
                       <TableCell>{parent.mobile_no}</TableCell>
                       <TableCell>
-                        <IconButton color="primary" onClick={() => handleEditClick(parent)}>
-                          <EditIcon />
-                        </IconButton>
+                        <PermissionGate permission={["parent:edit", "parent:manage", "parent", "admin"]}>
+                          <IconButton color="primary" onClick={() => handleEditClick(parent)}>
+                            <EditIcon />
+                          </IconButton>
+                        </PermissionGate>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -196,7 +201,7 @@ const Parent: React.FC = () => {
         )}
       </div>
 
-      <Drawer anchor="right" open={drawerOpen} onClose={handleCloseDrawer} PaperProps={{ sx: { width: "400px" } }}>
+      <Drawer anchor="right" open={drawerOpen} onClose={handleCloseDrawer} disableRestoreFocus PaperProps={{ sx: { width: "400px" } }}>
         <CreateParent
           onClose={handleCloseDrawer}
           onSubmit={handleSubmit}

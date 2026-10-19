@@ -90,6 +90,32 @@
   transition: color 0.2s ease;
 }
 
+/* Sidebar Submenu */
+.sidebar-sub-list {
+  padding-left: 24px !important;
+  margin-top: -4px;
+  margin-bottom: 8px;
+}
+
+.sidebar-sub-item {
+  min-height: 36px !important;
+  padding: 6px 14px !important;
+  margin-bottom: 3px !important;
+  border-radius: 6px !important;
+  color: #64748b !important;
+  transition: all 0.2s ease !important;
+}
+
+.sidebar-sub-item:hover {
+  background-color: #f1f5f9 !important;
+  color: #1d4ed8 !important;
+}
+
+.sidebar-sub-item.active {
+  background-color: #eff6ff !important;
+  color: #2563eb !important;
+}
+
 .toolbar-container {
   height: 64px;
 }
