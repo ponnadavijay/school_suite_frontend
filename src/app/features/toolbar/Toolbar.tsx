@@ -13,6 +13,7 @@ import {
 import { useAuth } from "../../context/AuthContext";
 import MenuIcon from "@mui/icons-material/Menu";
 import "./Toolbar.css";
+import { triggerProductTour } from "../tour/ProductTour";
 
 interface ToolbarProps {
   sidebarOpen: boolean;
@@ -95,6 +96,9 @@ const Toolbar: React.FC<ToolbarProps> = ({ sidebarOpen, onToggleSidebar }) => {
               </Box>
             </MenuItem>
             <Divider className="profile-menu-divider" />
+            <MenuItem onClick={() => { handleClose(); triggerProductTour(); }} className="profile-menu-item">
+              <Typography variant="body2">Replay Tour</Typography>
+            </MenuItem>
             <MenuItem onClick={handleLogout} className="profile-menu-item">
               <Typography variant="body2">Logout</Typography>
             </MenuItem>

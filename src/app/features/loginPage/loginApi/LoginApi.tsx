@@ -1,7 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import axios from 'axios';
 
-const BASE_URL = 'http://52.66.173.231:8001';
+const BASE_URL = 'https://patashala.intellvia.in';
 
 interface User {
   id: string;
@@ -16,13 +16,11 @@ export interface LoginPayload {
 }
 
 export interface LoginResponse {
-  user(user: any, access: string, refresh: string): unknown;
-  access: string;
-  refresh: string;
+  message: string;
 }
 
 export const loginUser = async (payload: LoginPayload): Promise<LoginResponse> => {
-  const response = await axios.post(`${BASE_URL}/api/users/login/`, payload);
+  const response = await axios.post(`${BASE_URL}/api/v1/auth/login`, payload);
   return response.data;
 };
 

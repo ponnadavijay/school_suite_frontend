@@ -1,6 +1,7 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { JSX, useState } from "react";
 import Sidebar from "../sidebar/Sidebar";
+import ProductTour from "../tour/ProductTour";
 
 function Home(): JSX.Element {
   const location = useLocation();
@@ -16,12 +17,15 @@ function Home(): JSX.Element {
   };
 
   return (
-    <Sidebar
-      isOpen={sidebarOpen}
-      onToggleSidebar={handleToggleSidebar}
-      onItemClick={handleSidebarItemClick}
-      currentPath={location.pathname}
-    />
+    <>
+      <Sidebar
+        isOpen={sidebarOpen}
+        onToggleSidebar={handleToggleSidebar}
+        onItemClick={handleSidebarItemClick}
+        currentPath={location.pathname}
+      />
+      <ProductTour />
+    </>
   );
 }
 

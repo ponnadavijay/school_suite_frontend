@@ -42,7 +42,8 @@
 .sidebar-icon img {
   width: 24px;
   height: 24px;
-  transition: filter 0.2s ease;
+  transition: filter 0.2s ease, transform 0.2s ease;
+  filter: invert(33%) sepia(90%) saturate(1982%) hue-rotate(212deg) brightness(96%) contrast(97%);
 }
 
 .sidebar-icon {
@@ -50,29 +51,36 @@
   align-items: center;
   justify-content: center;
   min-width: 24px;
-  color: inherit;
+  color: #2563eb !important;
+}
+
+.sidebar-icon svg {
+  color: #2563eb !important;
+  font-size: 22px;
 }
 
 .sidebar-item.active {
-  background-color: #f3f3f3;
-  color: #2A1989;
+  background-color: #eff6ff;
+  color: #1d4ed8;
   font-weight: bold;
+  border-left: 3px solid #2563eb;
 }
 
 .sidebar-item:hover .sidebar-icon img {
-  filter: brightness(0) saturate(100%) invert(14%) sepia(72%) saturate(3103%) hue-rotate(246deg) brightness(91%) contrast(96%);
+  filter: invert(28%) sepia(98%) saturate(2400%) hue-rotate(216deg) brightness(92%) contrast(100%);
+  transform: scale(1.08);
 }
 
 .sidebar-item:hover .sidebar-text {
-  color: #2A1989;
+  color: #1d4ed8;
 }
 
 .sidebar-item.active .sidebar-icon img {
-  filter: brightness(0) saturate(100%) invert(14%) sepia(72%) saturate(3103%) hue-rotate(246deg) brightness(91%) contrast(96%);
+  filter: invert(28%) sepia(98%) saturate(2400%) hue-rotate(216deg) brightness(92%) contrast(100%);
 }
 
 .sidebar-item.active .sidebar-text {
-  color: #2A1989;
+  color: #1d4ed8;
 }
 
 .sidebar-text .MuiTypography-root {

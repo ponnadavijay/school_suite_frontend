@@ -16,6 +16,10 @@ import Student from "../../../assets/Users.svg";
 import Users from "../../../assets/student.svg";
 import Parent from "../../../assets/parent.svg";
 import Attendance from "../../../assets/attendance.svg";
+import SchoolIcon from "@mui/icons-material/School";
+import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
+import SecurityIcon from "@mui/icons-material/Security";
+import DashboardCustomizeIcon from "@mui/icons-material/DashboardCustomize";
 import Toolbar from "../toolbar/Toolbar";
 import "./Sidebar.css";
 import { Outlet } from "react-router-dom";
@@ -82,6 +86,26 @@ const Sidebar: React.FC<SidebarProps> = ({
       label: "Student Attendance",
       icon: <img src={Attendance} alt="Attendance" />,
       path: "/student/attandance"
+    },
+    {
+      label: "School Tenants",
+      icon: <SchoolIcon sx={{ fontSize: 22, color: "#2563eb" }} />,
+      path: "/tenants"
+    },
+    {
+      label: "Roles",
+      icon: <AdminPanelSettingsIcon sx={{ fontSize: 22, color: "#2563eb" }} />,
+      path: "/roles"
+    },
+    {
+      label: "Permissions",
+      icon: <SecurityIcon sx={{ fontSize: 22, color: "#2563eb" }} />,
+      path: "/permissions"
+    },
+    {
+      label: "Admin Console",
+      icon: <DashboardCustomizeIcon sx={{ fontSize: 22, color: "#2563eb" }} />,
+      path: "/admin"
     }
   ];
 
@@ -138,7 +162,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 <ListItem
                   button
                   onClick={() => handleClick(item.path)}
-                  className={`sidebar-item ${isActive ? "active" : ""}`}
+                  className={`sidebar-item tour-${item.label.toLowerCase().replace(/\s+/g, '-')} ${isActive ? "active" : ""}`}
                 >
                   <ListItemIcon className="sidebar-icon">{item.icon}</ListItemIcon>
                   {isOpen && (

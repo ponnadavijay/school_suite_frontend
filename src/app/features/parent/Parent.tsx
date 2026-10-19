@@ -18,6 +18,7 @@ import {
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
+import FamilyRestroomIcon from "@mui/icons-material/FamilyRestroom";
 import { useAuth } from "../../context/AuthContext";
 import CreateParent from "./createParent/CreateParent";
 import "./Parent.css";
@@ -34,7 +35,7 @@ const Parent: React.FC = () => {
   const { user } = useAuth();
   const organizationId = user?.organization?.org_id;
 
-  const { data: parents = [], isLoading, isError, refetch } = useParents(organizationId);
+  const { data: parents = [], isLoading, isError, refetch } = useParents();
   const createParentMutation = useCreateParent();
   const updateParentMutation = useUpdateParent();
 
@@ -102,21 +103,35 @@ const Parent: React.FC = () => {
 
   return (
     <Box className="parent-page">
-      <div className="parent-header">
-        <div className="list-header-title">Parents</div>
-        <Button variant="contained" color="primary" startIcon={<AddIcon />} onClick={handleOpenDrawer}>
+      {/* Header Banner */}
+      <Box className="page-header-banner">
+        <Box>
+          <Typography variant="h4" className="page-header-title">
+            <FamilyRestroomIcon sx={{ fontSize: 34 }} />
+            Parent Directory
+          </Typography>
+          <Typography className="page-header-subtitle">
+            Manage parent records, guardians, and contact directory
+          </Typography>
+        </Box>
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={handleOpenDrawer}
+          className="page-header-primary-btn"
+        >
           Register Parent
         </Button>
-      </div>
+      </Box>
 
-      <Box sx={{ my: 2, display: "flex", justifyContent: "flex-start" }}>
+      <Box sx={{ mb: 3, display: "flex", justifyContent: "flex-start" }}>
         <TextField
-          label="Search By Parent"
+          placeholder="Search by parent name or email..."
           variant="outlined"
           size="small"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          sx={{ width: 300 }}
+          sx={{ width: 320, bgcolor: "#ffffff", borderRadius: 2 }}
         />
       </Box>
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Card,
   CardContent,
@@ -20,6 +20,8 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  IconButton,
+  Tooltip,
 } from "@mui/material";
 import { useAuth } from "../../../context/AuthContext";
 import {
@@ -28,6 +30,10 @@ import {
 } from "../teacherApi/TeacherApi";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
+import EventAvailableIcon from "@mui/icons-material/EventAvailable";
+import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import RefreshIcon from "@mui/icons-material/Refresh";
+import SchoolIcon from "@mui/icons-material/School";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./TeacherAttendance.css";
@@ -121,19 +127,69 @@ const TeacherAttendance: React.FC = () => {
       return true;
     }) || [];
 
+  const todayFormatted = useMemo(() => {
+    const now = new Date();
+    return now.toLocaleDateString("en-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  }, []);
+
   return (
     <div className="attendance-container">
-      <div className="teacher-attendance-header">
-        <div className="teacher-attendance-title">Teacher Attendance</div>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleOpenConfirm}
-          disabled={bulkUpdateMutation.isLoading}
-        >
-          {bulkUpdateMutation.isLoading ? "Updating..." : "Submit Attendance"}
-        </Button>
-      </div>
+      {/* Header Banner */}
+      <Box className="page-header-banner" sx={{ flexDirection: { xs: "column", sm: "row" }, alignItems: { xs: "flex-start", sm: "center" }, gap: 2 }}>
+        <Box>
+          <Typography variant="h4" className="page-header-title">
+            <SchoolIcon sx={{ fontSize: 36 }} />
+            Teacher Daily Attendance Register
+          </Typography>
+          <Typography className="page-header-subtitle">
+            Track faculty check-ins, presence status, and leave records
+          </Typography>
+          <Box
+            sx={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 1,
+              px: 1.8,
+              py: 0.6,
+              borderRadius: "20px",
+              background: "rgba(255, 255, 255, 0.16)",
+              backdropFilter: "blur(6px)",
+              border: "1px solid rgba(255, 255, 255, 0.25)",
+              fontSize: "0.85rem",
+              fontWeight: 600,
+              color: "#ffffff",
+              mt: 1.2,
+            }}
+          >
+            <CalendarTodayIcon sx={{ fontSize: 16 }} />
+            {todayFormatted}
+          </Box>
+        </Box>
+        <Box display="flex" gap={1.5} alignItems="center">
+          <Tooltip title="Refresh Teacher List">
+            <IconButton
+              onClick={() => refetchTeachers()}
+              disabled={isLoading}
+              className="page-header-icon-btn"
+            >
+              <RefreshIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <Button
+            variant="contained"
+            onClick={handleOpenConfirm}
+            disabled={bulkUpdateMutation.isLoading}
+            className="page-header-primary-btn"
+          >
+            {bulkUpdateMutation.isLoading ? "Updating..." : "Submit Attendance"}
+          </Button>
+        </Box>
+      </Box>
 
       <div>
         {isLoading && (

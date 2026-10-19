@@ -15,6 +15,7 @@ import {
   CircularProgress,
   TextField,
   TablePagination,
+  Tooltip,
 } from "@mui/material";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -22,6 +23,8 @@ import CreateTeacher from "./createTeacher/CreateTeacher";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import SchoolIcon from "@mui/icons-material/School";
+import RefreshIcon from "@mui/icons-material/Refresh";
 import { useCreateTeacher, useUpdateTeacher, useGetAllTeachers } from "./teacherApi/TeacherApi";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -46,7 +49,7 @@ const Teacher: React.FC = () => {
     isLoading,
     isError,
     refetch: refetchTeachers,
-  } = useGetAllTeachers(organizationId);
+  } = useGetAllTeachers();
 
   const handleOpenDrawer = () => {
     setDrawerOpen(true);
@@ -119,31 +122,49 @@ const Teacher: React.FC = () => {
 
   return (
     <Box className="teacher-page">
-      <div className="teacher-header-container">
-        <Box className="teacher-header">
-          <div className="list-header-title">Teachers</div>
+      {/* Header Banner */}
+      <Box className="page-header-banner">
+        <Box>
+          <Typography variant="h4" className="page-header-title">
+            <SchoolIcon sx={{ fontSize: 34 }} />
+            Teacher Management
+          </Typography>
+          <Typography className="page-header-subtitle">
+            Manage teacher profiles, qualifications, and classroom designations
+          </Typography>
+        </Box>
+        <Box display="flex" gap={1.5} alignItems="center">
+          <Tooltip title="Refresh Teachers">
+            <IconButton
+              onClick={() => refetchTeachers()}
+              disabled={isLoading}
+              className="page-header-icon-btn"
+            >
+              <RefreshIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
           <Button
             variant="contained"
-            color="primary"
             startIcon={<AddIcon />}
             onClick={handleOpenDrawer}
             disabled={isLoading}
+            className="page-header-primary-btn"
           >
             Register Teacher
           </Button>
         </Box>
+      </Box>
 
-        <Box sx={{ my: 2, display: "flex", justifyContent: "flex-start" }}>
-          <TextField
-            label="Search By Teacher"
-            variant="outlined"
-            size="small"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            sx={{ width: 300 }}
-          />
-        </Box>
-      </div>
+      <Box sx={{ mb: 3, display: "flex", justifyContent: "flex-start" }}>
+        <TextField
+          placeholder="Search by teacher name or email..."
+          variant="outlined"
+          size="small"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          sx={{ width: 320, bgcolor: "#ffffff", borderRadius: 2 }}
+        />
+      </Box>
 
       <div>
         {isLoading && (

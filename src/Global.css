@@ -112,3 +112,63 @@ h6 {
   color: var(--primary-purple-600);
   background-color: var(--primary-purple-100);
 }
+
+/* Premium School Suite Banner Header */
+.page-header-banner {
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #180e51 0%, #2A1989 100%);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 4px 12px rgba(42, 25, 137, 0.15);
+  border-radius: 16px;
+  margin-bottom: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.page-header-title {
+  font-size: 1.65rem !important;
+  font-weight: 800 !important;
+  color: #ffffff !important;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  line-height: 1.2;
+}
+
+.page-header-subtitle {
+  font-size: 0.88rem !important;
+  color: rgba(255, 255, 255, 0.82) !important;
+  margin-top: 4px !important;
+}
+
+.page-header-primary-btn {
+  background-color: #ffffff !important;
+  color: #2A1989 !important;
+  font-weight: 700 !important;
+  border-radius: 10px !important;
+  padding: 8px 20px !important;
+  text-transform: none !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15) !important;
+  border: 1px solid rgba(255, 255, 255, 0.6) !important;
+  transition: all 0.2s ease !important;
+}
+
+.page-header-primary-btn:hover {
+  background-color: #f1edff !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25) !important;
+}
+
+.page-header-icon-btn {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  transition: all 0.2s ease !important;
+}
+
+.page-header-icon-btn:hover {
+  background-color: rgba(255, 255, 255, 0.28) !important;
+  transform: scale(1.05);
+}

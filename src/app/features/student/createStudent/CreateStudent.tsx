@@ -36,8 +36,8 @@ const CreateStudent: React.FC<CreateStudentProps> = ({
 
     const [errors, setErrors] = useState<Record<string, string>>({});
 
-    const { data: parents } = useParents(organizationId);
-    const { data: classrooms } = useClassrooms(organizationId);
+    const { data: parents } = useParents();
+    const { data: classrooms } = useClassrooms();
 
     useEffect(() => {
         if (studentData) {
@@ -153,14 +153,14 @@ const CreateStudent: React.FC<CreateStudentProps> = ({
                 <Box mb={2}>
                     <Autocomplete
                         options={classrooms || []}
-                        getOptionLabel={(option: Classroom) => 
-                            `Class ${option.class_no}${option.class_section ? ` - Section ${option.class_section}` : ''}`
+                        getOptionLabel={(option: any) => 
+                            `Class ${option.class_no}${option.section ? ` - Section ${option.section}` : ''}`
                         }
                         value={
-                            classrooms?.find((c: Classroom) => String(c.class_id) === String(formData.class_room)) ||
+                            classrooms?.find((c: any) => String(c.class_id) === String(formData.class_room)) ||
                             null
                         }
-                        isOptionEqualToValue={(option: Classroom, value: Classroom) =>
+                        isOptionEqualToValue={(option: any, value: any) =>
                             String(option.class_id) === String(value.class_id)
                         }
                         onChange={(_, newValue) => {
@@ -174,7 +174,7 @@ const CreateStudent: React.FC<CreateStudentProps> = ({
                         }}
                         renderOption={(props, option) => (
                             <li {...props}>
-                                Class {option.class_no}{option.class_section && ` - Section ${option.class_section}`}
+                                Class {option.class_no}{option.section && ` - Section ${option.section}`}
                             </li>
                         )}
                         renderInput={(params) => (

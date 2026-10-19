@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Card,
   CardContent,
@@ -19,9 +19,14 @@ import {
   Dialog,
   DialogActions,
   DialogTitle,
+  IconButton,
+  Tooltip,
 } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
+import EventAvailableIcon from "@mui/icons-material/EventAvailable";
+import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import RefreshIcon from "@mui/icons-material/Refresh";
 import { useAuth } from "../../../context/AuthContext";
 import {
   useStudents,
@@ -53,14 +58,18 @@ const StudentAttendance: React.FC = () => {
   const [attendanceMap, setAttendanceMap] = useState<Record<string, string>>({});
   const [confirmOpen, setConfirmOpen] = useState(false);
 
+  const classroomsList = Array.isArray(classrooms) 
+    ? classrooms 
+    : classrooms?.data || classrooms?.items || [];
+
   const classNumbers = Array.from(
-    new Set(classrooms?.map((cls) => cls.class_no) || [])
+    new Set(classroomsList?.map((cls: any) => cls.class_no) || [])
   ).sort();
 
   const sections =
-    classrooms
-      ?.filter((cls) => cls.class_no === selectedClass)
-      .map((cls) => cls.class_section)
+    classroomsList
+      ?.filter((cls: any) => cls.class_no === selectedClass)
+      .map((cls: any) => cls.section)
       .sort() || [];
 
   useEffect(() => {
@@ -68,7 +77,7 @@ const StudentAttendance: React.FC = () => {
       let filtered = students.filter((student) => {
         return (
           student.class_room?.class_no === selectedClass &&
-          student.class_room?.class_section === selectedSection
+          student.class_room?.section === selectedSection
         );
       });
 
@@ -133,21 +142,71 @@ const StudentAttendance: React.FC = () => {
   ).length;
   const totalCount = filteredStudents.length;
 
+  const todayFormatted = useMemo(() => {
+    const now = new Date();
+    return now.toLocaleDateString("en-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  }, []);
+
   return (
     <div className="student-attendance-container">
-      <div className="student-attendance-header">
-        <div className="student-attendance-title">Student Attendance</div>
-        {selectedClass && selectedSection && (
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleSubmitAttendance}
-            disabled={bulkUpdateMutation.isLoading}
+      {/* Header Banner */}
+      <Box className="page-header-banner" sx={{ flexDirection: { xs: "column", sm: "row" }, alignItems: { xs: "flex-start", sm: "center" }, gap: 2 }}>
+        <Box>
+          <Typography variant="h4" className="page-header-title">
+            <EventAvailableIcon sx={{ fontSize: 36 }} />
+            Student Daily Attendance Register
+          </Typography>
+          <Typography className="page-header-subtitle">
+            Mark and record real-time classroom attendance for enrolled students
+          </Typography>
+          <Box
+            sx={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 1,
+              px: 1.8,
+              py: 0.6,
+              borderRadius: "20px",
+              background: "rgba(255, 255, 255, 0.16)",
+              backdropFilter: "blur(6px)",
+              border: "1px solid rgba(255, 255, 255, 0.25)",
+              fontSize: "0.85rem",
+              fontWeight: 600,
+              color: "#ffffff",
+              mt: 1.2,
+            }}
           >
-            {bulkUpdateMutation.isLoading ? "Submitting..." : "Submit Attendance"}
-          </Button>
-        )}
-      </div>
+            <CalendarTodayIcon sx={{ fontSize: 16 }} />
+            {todayFormatted}
+          </Box>
+        </Box>
+        <Box display="flex" gap={1.5} alignItems="center">
+          <Tooltip title="Refresh Student List">
+            <IconButton
+              onClick={() => refetchStudents()}
+              disabled={isLoading}
+              className="page-header-icon-btn"
+            >
+              <RefreshIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          {selectedClass && selectedSection && (
+            <Button
+              variant="contained"
+              onClick={handleSubmitAttendance}
+              disabled={bulkUpdateMutation.isLoading}
+              className="page-header-primary-btn"
+            >
+              {bulkUpdateMutation.isLoading ? "Submitting..." : "Submit Attendance"}
+            </Button>
+          )}
+        </Box>
+      </Box>
 
       <div>
         {isLoading && (

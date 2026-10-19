@@ -41,8 +41,35 @@ const LoginPage: React.FC = () => {
 
     loginMutation.mutate(signInData, {
       onSuccess: (data) => {
-        setAuthData(data.user, data.access, data.refresh);
-        navigate("/dashboard");
+        if (data?.message && data.message !== "User does not exist") {
+          const accessToken = (data as any).access_token || (data as any).token || "";
+          const refreshToken = (data as any).refresh_token || "";
+          
+          let userObj = null;
+          if (accessToken) {
+            try {
+              const payloadBase64 = accessToken.split('.')[1];
+              const payloadDecoded = JSON.parse(atob(payloadBase64));
+              userObj = payloadDecoded.user || payloadDecoded;
+              
+              // Map old AuthContext expectations to new user schema
+              userObj = {
+                ...userObj,
+                role: { role_id: userObj.role_id, role_name: userObj.role_name },
+                organization: { org_id: userObj.tenant_id, org_name: "Tech Patashala" }
+              };
+            } catch (e) {
+              console.error("Failed to parse JWT", e);
+            }
+          }
+
+          setAuthData(userObj, accessToken, refreshToken);
+          navigate("/dashboard");
+        } else if (data?.message === "User does not exist") {
+          setSignInError("User does not exist. Please check your credentials.");
+        } else {
+          navigate("/dashboard");
+        }
       },
       onError: (error: any) => {
         setSignInError("Login failed. Please check your credentials.");

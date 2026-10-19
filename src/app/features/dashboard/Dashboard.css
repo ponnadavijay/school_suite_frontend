@@ -1,182 +1,220 @@
-.home-container {
-    padding: 16px;
-    background: linear-gradient(to bottom, #c5c0e0 60%, #e8e6f2 0%);
+/* Modern School Suite Dashboard Styles */
+.dashboard-container {
+  display: flex;
+  flex-direction: column;
 }
 
-.greeting-text {
-    margin-bottom: 8px;
-    display: flex;
-    font-size: 1.5rem;
-    font-family: var(--font-family-secondary);
+.dashboard-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+  margin-bottom: 16px;
 }
 
-.subtitle-text {
-    margin-bottom: 32px;
-    font-size: 1rem;
-    font-family: var(--font-family-secondary);
+.dashboard-section-title {
+  font-size: 1.25rem !important;
+  font-weight: 700 !important;
+  color: #1e1b4b !important;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.cards-grid {
-    width: 100%;
-    padding-top: 1rem;
+.dashboard-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  margin-bottom: 28px;
 }
 
-.dashboard-card {
-    border-radius: 8px;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease;
-    height: 100%;
+.dashboard-kpi-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+  border: 1px solid #edf0f7;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
 }
 
-.card-content {
-    padding: 16px !important;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
+.dashboard-kpi-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: transparent;
+  transition: background 0.25s ease;
 }
 
-.card-main-content {
-    display: flex;
-    flex-direction: column;
-    font-size: 24px;
-    gap: 13px;
-    width: 150px;
+.dashboard-kpi-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 24px rgba(42, 25, 137, 0.1);
+  border-color: rgba(42, 25, 137, 0.2);
 }
 
-.card-text {
-    display: flex;
-    flex: 1;
+.dashboard-kpi-card:hover::before {
+  background: linear-gradient(90deg, #2A1989, #4338ca);
 }
 
-.card-title {
-    font-size: var(--default-font-size);
+.kpi-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
 }
 
-.card-value-container {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+.kpi-icon-box {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
 }
 
-.card-value {
-    font-weight: 600;
-    margin: 0;
+.dashboard-kpi-card:hover .kpi-icon-box {
+  transform: scale(1.08);
 }
 
-.card-icon-container {
-    border-radius: 12px;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.kpi-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.cards-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 16px;
+.kpi-count {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #1e293b;
+  line-height: 1.1;
+  margin-bottom: 8px;
 }
 
-.dashboard-card {
-    flex: 1 1 calc(33.333% - 16px);
-    min-width: 250px;
-    cursor: pointer;
-    border-radius: 12px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s;
+.kpi-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 10px;
+  border-top: 1px dashed #f1f5f9;
+  font-size: 0.8rem;
+  color: #64748b;
 }
 
-.dashboard-card:hover {
-    transform: scale(1.02);
+/* Color Themes for KPI Cards */
+.theme-purple-icon {
+  background-color: #f1edff;
+  color: var(--primary-purple-600);
 }
 
-.class-section-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 16px;
+.theme-green-icon {
+  background-color: #ecfdf5;
+  color: #059669;
 }
 
-.class-card {
-    flex: 1 1 calc(25% - 16px);
-    min-width: 200px;
-    border-radius: 12px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-    padding: 12px;
+.theme-red-icon {
+  background-color: #fef2f2;
+  color: #dc2626;
 }
 
-.class-title {
-    font-size: 20px;
-    color: var(--primary-purple-800);
-    font-weight: bold;
-    margin-bottom: 8px;
+.theme-blue-icon {
+  background-color: #eff6ff;
+  color: #2563eb;
 }
 
-.total-text {
-    display: flex;
-    align-items: center;
-    color: var(--primary-purple-600);
+/* Attendance Analytics Container */
+.attendance-panel {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  border: 1px solid #edf0f7;
+  margin-top: 8px;
 }
 
-.present-text {
-    display: flex;
-    align-items: center;
-    color: var(--secondary-color);
-    font-weight: 500;
+.class-pill-scroll {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 12px;
+  margin-bottom: 16px;
 }
 
-.absent-text {
-    display: flex;
-    align-items: center;
-    color: var(--accent-color);
-    font-weight: 500;
+.class-pill-scroll::-webkit-scrollbar {
+  height: 5px;
 }
 
-.class-section-value {
-    display: flex;
-    font-size: 20px;
-    font-weight: bold;
-    margin-left: 6px;
+.class-pill-scroll::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
 }
 
-.section-title {
-    display: flex;
-    font-size: 24px;
-    color: var(--primary-purple-800);
-    font-weight: bold;
+.class-pill-scroll::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
 }
 
-.section-sub-title {
-    display: flex;
-    font-size: 24px;
-    color: var(--primary-purple-800);
-    margin: 1rem 0;
-    font-weight: bold;
+.class-pill-btn {
+  white-space: nowrap !important;
+  border-radius: 10px !important;
+  padding: 8px 18px !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+  transition: all 0.2s ease !important;
+  border: 1px solid #e2e8f0 !important;
 }
 
-.dashboard-container .divider {
-    margin: 1rem 0;
+.class-pill-btn.active {
+  background-color: #2A1989 !important;
+  color: #ffffff !important;
+  border-color: #2A1989 !important;
+  box-shadow: 0 4px 12px rgba(42, 25, 137, 0.25) !important;
 }
 
-.class-buttons {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin-bottom: 1rem;
+.section-pill-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
 }
 
-.section-buttons {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin: 1rem 0;
+.section-pill-btn {
+  border-radius: 8px !important;
+  padding: 6px 16px !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+  font-size: 0.85rem !important;
 }
 
-.section-cards-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 16px;
-    margin: 1rem 0;
-    justify-content: flex-start;
+.section-pill-btn.active {
+  background-color: #eff6ff !important;
+  color: #2563eb !important;
+  border-color: #2563eb !important;
+}
+
+.section-summary-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.section-stat-card {
+  background: #fafafc;
+  border: 1px solid #e8ecf4;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }

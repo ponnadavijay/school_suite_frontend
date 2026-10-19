@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
 import { useAuth } from "../../../context/AuthContext";
 
-const BASE_URL = 'http://52.66.173.231:8001';
+const BASE_URL = 'https://patashala.intellvia.in';
 
 export interface CreateParentPayload {
   name: string;
@@ -54,35 +54,35 @@ const setAuthHeader = (token: string) => {
 };
 
 const createParent = async (payload: CreateParentPayload): Promise<Parent> => {
-  const response = await api.post(`/users/api/register/parent`, payload);
+  const response = await api.post(`/api/v1/auth/register`, payload);
   return response.data;
 };
 
-const fetchParents = async (organizationId: number): Promise<Parent[]> => {
-  const response = await api.get(`/parent/Parents/list/${organizationId}/`);
+const fetchParents = async (): Promise<Parent[]> => {
+  const response = await api.get(`/api/v1/admin/users`);
   return response.data;
 };
 
 const fetchParentOrganization = async (): Promise<any> => {
-  const response = await api.get(`/parent/Parents/organization/`);
+  const response = await api.get(`/api/v1/tenant/tenants`);
   return response.data;
 };
 
-const fetchParent = async (parentId: number): Promise<Parent> => {
-  const response = await api.get(`/parent/Parents/retrieve/${parentId}/`);
+const fetchParent = async (parentId: string): Promise<Parent> => {
+  const response = await api.get(`/api/v1/admin/user/${parentId}`);
   return response.data;
 };
 
-const fetchParentStudents = async (parentId: number): Promise<Student[]> => {
-  const response = await api.get(`/parent/Parents/students/list/${parentId}/`);
+const fetchParentStudents = async (parentId: string): Promise<Student[]> => {
+  const response = await api.get(`/api/v1/student/students?parent_id=${parentId}`);
   return response.data;
 };
 
 const updateParent = async ({
   parent_id,
   ...payload
-}: { parent_id: number } & Partial<CreateParentPayload>): Promise<Parent> => {
-  const response = await api.put(`/parent/Parents/update/${parent_id}/`, payload);
+}: { parent_id: string } & Partial<CreateParentPayload>): Promise<Parent> => {
+  const response = await api.put(`/api/v1/admin/user/${parent_id}`, payload);
   return response.data;
 };
 
@@ -97,16 +97,16 @@ export const useCreateParent = () => {
   });
 };
 
-export const useParents = (organizationId?: number) => {
+export const useParents = () => {
   const { accessToken } = useAuth();
 
   return useQuery<Parent[], ApiError>({
-    queryKey: ["parents", organizationId],
+    queryKey: ["parents"],
     queryFn: () => {
       if (accessToken) setAuthHeader(accessToken);
-      return fetchParents(organizationId!);
+      return fetchParents();
     },
-    enabled: !!accessToken && !!organizationId,
+    enabled: !!accessToken,
     keepPreviousData: true,
     staleTime: 0,
     refetchOnMount: true,
@@ -128,7 +128,7 @@ export const useParentOrganization = () => {
   });
 };
 
-export const useParent = (parentId?: number) => {
+export const useParent = (parentId?: string) => {
   const { accessToken } = useAuth();
 
   return useQuery<Parent, ApiError>({
@@ -146,7 +146,7 @@ export const useParent = (parentId?: number) => {
   });
 };
 
-export const useParentStudents = (parentId?: number) => {
+export const useParentStudents = (parentId?: string) => {
   const { accessToken } = useAuth();
 
   return useQuery<Student[], ApiError>({
@@ -164,22 +164,17 @@ export const useParentStudents = (parentId?: number) => {
   });
 };
 
-export const useUpdateParent = (organizationId?: number) => {
+export const useUpdateParent = () => {
   const { accessToken } = useAuth();
   const queryClient = useQueryClient();
 
-  return useMutation<Parent, ApiError, { parent_id: number } & Partial<CreateParentPayload>>({
+  return useMutation<Parent, ApiError, { parent_id: string } & Partial<CreateParentPayload>>({
     mutationFn: (payload) => {
       if (accessToken) setAuthHeader(accessToken);
       return updateParent(payload);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["parents", organizationId] });
+      queryClient.invalidateQueries({ queryKey: ["parents"] });
     },
-    keepPreviousData: true,
-    staleTime: 0,
-    refetchOnMount: true,
-    refetchOnWindowFocus: true,
-    refetchOnReconnect: true,
   });
 };

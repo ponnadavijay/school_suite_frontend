@@ -1,21 +1,13 @@
 import React, { createContext, useContext, useState, ReactNode } from "react";
 
-interface Role {
-  role_id: number;
-  role_name: string;
-}
-
-interface Organization {
-  org_id: number;
-  org_name: string;
-  org_estd_date: string;
-  founder: string;
-}
-
 interface User {
-  email: string;
-  role: Role;
-  organization: Organization;
+  id?: string;
+  email?: string;
+  role_id?: string;
+  tenant_id?: string;
+  username?: string;
+  first_name?: string;
+  last_name?: string;
 }
 
 interface AuthContextType {
@@ -24,7 +16,7 @@ interface AuthContextType {
   refreshToken: string | null;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
-  setAuthData: (user: User, access: string, refresh: string) => void;
+  setAuthData: (user: User | null, access: string, refresh?: string) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -63,14 +55,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     localStorage.removeItem("refreshToken");
   };
 
-  const setAuthData = (user: User, access: string, refresh: string) => {
+  const setAuthData = (user: User | null, access: string, refresh?: string) => {
     setUser(user);
     setAccessToken(access);
-    setRefreshToken(refresh);
+    if (refresh) setRefreshToken(refresh);
 
-    localStorage.setItem("user", JSON.stringify(user));
+    if (user) localStorage.setItem("user", JSON.stringify(user));
     localStorage.setItem("accessToken", access);
-    localStorage.setItem("refreshToken", refresh);
+    if (refresh) localStorage.setItem("refreshToken", refresh);
   };
 
   return (

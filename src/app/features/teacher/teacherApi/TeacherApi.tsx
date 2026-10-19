@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
 import { useAuth } from "../../../context/AuthContext";
 
-const BASE_URL = 'http://52.66.173.231:8001';
+const BASE_URL = 'https://patashala.intellvia.in';
 
 // ================== Types ==================
 export interface Teacher {
@@ -65,20 +65,20 @@ const setAuthHeader = (token: string) => {
 };
 
 // Get all teachers
-const fetchAllTeachers = async (organizationId?: number): Promise<Teacher[]> => {
-  const response = await api.get(`/teacher/teachers/list/${organizationId}/`);
+const fetchAllTeachers = async (): Promise<Teacher[]> => {
+  const response = await api.get(`/api/v1/admin/users`);
   return response.data;
 };
 
 // Get single teacher
-const fetchTeacher = async (teacherId: number): Promise<Teacher> => {
-  const response = await api.get(`/teacher/teachers/retrieve/${teacherId}/`);
+const fetchTeacher = async (teacherId: string): Promise<Teacher> => {
+  const response = await api.get(`/api/v1/admin/user/${teacherId}`);
   return response.data;
 };
 
 // Create teacher
 const createTeacher = async (payload: CreateTeacherPayload): Promise<Teacher> => {
-  const response = await api.post("/users/api/register/teacher", payload);
+  const response = await api.post("/api/v1/auth/register", payload);
   return response.data;
 };
 
@@ -87,26 +87,26 @@ const updateTeacher = async ({
   teacher_id,
   ...payload
 }: UpdateTeacherPayload): Promise<Teacher> => {
-  const response = await api.put(`/teacher/teachers/update/${teacher_id}/`, payload);
+  const response = await api.put(`/api/v1/admin/user/${teacher_id}`, payload);
   return response.data;
 };
 
-const fetchOneTeacher = async (teacherId: number): Promise<Teacher> => {
-  const response = await api.get(`/teacher/teachers/retrieve/${teacherId}/`);
+const fetchOneTeacher = async (teacherId: string): Promise<Teacher> => {
+  const response = await api.get(`/api/v1/admin/user/${teacherId}`);
   return response.data;
 };
 
 // ================== React Query Hooks ==================
-export const useGetAllTeachers = (organizationId?: number) => {
+export const useGetAllTeachers = () => {
   const { accessToken } = useAuth();
 
   return useQuery<Teacher[]>({
-    queryKey: ["teachers", organizationId],
+    queryKey: ["teachers"],
     queryFn: () => {
       if (accessToken) setAuthHeader(accessToken);
-      return fetchAllTeachers(organizationId);
+      return fetchAllTeachers();
     },
-    enabled: !!accessToken && !!organizationId,
+    enabled: !!accessToken,
     keepPreviousData: true,
     staleTime: 0,
     refetchOnMount: true,
@@ -115,7 +115,7 @@ export const useGetAllTeachers = (organizationId?: number) => {
   });
 };
 
-export const useGetRetriveTeacher = (teacherId: number) => {
+export const useGetRetriveTeacher = (teacherId: string) => {
   const { accessToken } = useAuth();
 
   return useQuery<Teacher>({
